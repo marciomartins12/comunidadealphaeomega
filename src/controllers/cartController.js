@@ -11,7 +11,7 @@ const products = {
   quadrinho_pb_branca_regular: {
     id: 'quadrinho_pb_branca_regular',
     name: 'Quadrinho P&B Santos (regular)',
-    price: 68.0,
+    price: 58.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSP&B-BRANCA.png'
   },
   quadrinho_color_preta: {
@@ -23,7 +23,7 @@ const products = {
   quadrinho_color_preta_regular: {
     id: 'quadrinho_color_preta_regular',
     name: 'Quadrinho Color Santos (preta regular)',
-    price: 68.0,
+    price: 58.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png'
   }
 };
