@@ -1,0 +1,80 @@
+<section class="payment">
+  <div class="container payment-inner">
+    <h2 class="payment-title">Pagamento via PIX</h2>
+    <p class="payment-note">Valor: {{valor}}</p>
+    <p class="payment-status">Status: <span id="payStatus">{{status}}</span></p>
+
+    <div id="paidBox" class="payment-box payment-success" hidden>
+      <h3 class="payment-box-title">Pagamento aprovado</h3>
+      <p class="payment-box-text">Seu pagamento foi confirmado. Sua inscrição está garantida.</p>
+    </div>
+
+    {{#if qr_code_base64}}
+      <img class="payment-qr" src="data:image/png;base64,{{qr_code_base64}}" alt="QR Code PIX" />
+    {{/if}}
+
+    {{#if qr_code}}
+      <div class="payment-code">
+        <span class="code-label">Copiar e colar:</span>
+        <code class="pix-code">{{qr_code}}</code>
+        <button type="button" class="payment-copy" id="copyPix">Copiar código</button>
+      </div>
+    {{/if}}
+
+    {{#if ticket_url}}
+      <a class="payment-link" href="{{ticket_url}}" target="_blank" rel="noopener">Pagar no site do Mercado Pago</a>
+    {{/if}}
+
+    <p class="payment-help">Se tiver qualquer dúvida, entre em contato com a secretaria.</p>
+  </div>
+  <script>
+  (function(){
+    const statusEl = document.getElementById('payStatus');
+    const id = '{{inscricaoId}}';
+    async function refresh(){
+      try{
+        const r = await fetch(`/pagamento/status/${id}`);
+        const data = await r.json();
+        if (!data.ok) return;
+        const pt = { approved: 'Aprovado', pending: 'Pendente', in_process: 'Em análise', rejected: 'Recusado', expired: 'Expirado' };
+        statusEl.textContent = pt[data.status] || data.status;
+        const box = document.getElementById('paidBox');
+        if (data.paid) {
+          const qr = document.querySelector('.payment-qr');
+          const code = document.querySelector('.payment-code');
+          const link = document.querySelector('.payment-link');
+          if(qr) qr.style.display='none';
+          if(code) code.style.display='none';
+          if(link) link.style.display='none';
+          if(box) box.hidden = false;
+        } else {
+          if(box) box.hidden = true;
+        }
+        if (data.recreated) {
+          location.reload();
+        }
+      }catch{}
+    }
+    refresh();
+    const iv = setInterval(refresh, 5000);
+  })();
+  </script>
+</section>
+<script>
+(function(){
+  const el=document.querySelector('.pix-code');
+  const btn=document.getElementById('copyPix');
+  if(btn&&el){
+    const setDone=()=>{btn.textContent='Copiado!';setTimeout(()=>btn.textContent='Copiar código',1500)};
+    btn.addEventListener('click',async()=>{
+      const t=el.textContent||'';
+      try{await navigator.clipboard.writeText(t);setDone();}
+      catch(e){
+        const ta=document.createElement('textarea');
+        ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);setDone();
+      }
+    });
+  }
+})();
+</script>
+</section>

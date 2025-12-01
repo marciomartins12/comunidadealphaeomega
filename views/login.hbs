@@ -1,0 +1,44 @@
+<section class="auth">
+  <div class="container auth-inner">
+    <h2 class="shop-title">Entrar</h2>
+    {{#if error}}<p class="insc-error">{{error}}</p>{{/if}}
+    <div class="form-wrapper">
+      <div class="form-card">
+        <div class="form-field form-col">
+          <form method="post" action="/login">
+            <input type="hidden" name="next" value="{{next}}"/>
+            <div class="form-field"><span>Email</span><input type="email" name="email" required/></div>
+            <div class="form-field"><span>Senha</span><input type="password" name="senha" required/></div>
+            <div class="form-actions"><button class="btn" type="submit">Entrar</button></div>
+          </form>
+        </div>
+        <div class="form-field form-col auth-toggle">
+          <button class="footer-back" id="toggleRegister" type="button">Criar conta</button>
+        </div>
+        <div id="registerBox" class="form-field form-col auth-register">
+          <h2 class="shop-title">Criar conta</h2>
+          <form method="post" action="/register">
+            <input type="hidden" name="next" value="{{next}}"/>
+            <div class="form-field"><span>Nome</span><input type="text" name="nome" required/></div>
+            <div class="form-field"><span>Email</span><input type="email" name="email" required/></div>
+            <div class="form-field"><span>Senha</span><input type="password" name="senha" required/></div>
+            <div class="form-field"><span>CPF</span><input type="text" name="cpf" required/></div>
+            <div class="form-actions"><button class="btn" type="submit">Criar conta</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  const btn = document.getElementById('toggleRegister');
+  const box = document.getElementById('registerBox');
+  if (btn && box) {
+    btn.addEventListener('click', () => {
+      const isHidden = getComputedStyle(box).display === 'none';
+      box.style.display = isHidden ? 'block' : 'none';
+    });
+  }
+})();
+</script>

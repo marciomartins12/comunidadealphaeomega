@@ -1,0 +1,213 @@
+<section class="inscricao">
+  <div class="container inscricao-inner">
+    <div class="code-gate" id="codeGate">
+      <h2 class="insc-title">Inscrição</h2>
+      <p class="insc-note">Digite o código para liberar o formulário</p>
+      <input id="accessCode" class="insc-input" type="password" placeholder="Código de acesso" aria-label="Código de acesso">
+      <button id="codeSubmit" class="btn">Confirmar código</button>
+      <p id="codeError" class="insc-error" hidden>Código inválido. Entre em contato com alguém da paróquia para mais informação.</p>
+    </div>
+
+    <div class="status-box" id="statusBox">
+      <h3 class="form-title"><span>Verificar andamento da inscrição</span></h3>
+      <div class="status-row">
+        <input id="statusCpf" class="insc-input" type="text" placeholder="CPF (000.000.000-00)" aria-label="CPF para verificar">
+        <button id="statusBtn" class="btn">Verificar</button>
+      </div>
+      <p id="statusMsg" class="insc-note"></p>
+    </div>
+
+    <div id="formWrapper" class="form-wrapper form-card" hidden>
+      <form id="inscricaoForm" enctype="multipart/form-data" method="post" action="/inscricao" novalidate>
+        <h3 class="form-title"><span>Dados Pessoais</span></h3>
+
+        <div class="form-grid">
+          <label class="form-field">
+            <span>Nome completo</span>
+            <input type="text" name="nome" required>
+          </label>
+
+          <label class="form-field">
+            <span>Sexo</span>
+            <select name="sexo" required>
+              <option value="">Selecione</option>
+              <option>Feminino</option>
+              <option>Masculino</option>
+              <option>Outro</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Data de nascimento</span>
+            <input type="date" name="nascimento" required>
+          </label>
+
+          <label class="form-field">
+            <span>Contato pessoal/WhatsApp</span>
+            <input type="tel" name="whatsapp" required>
+          </label>
+
+          <label class="form-field">
+            <span>CPF</span>
+            <input type="text" name="cpf" id="cpf" placeholder="000.000.000-00" required>
+          </label>
+
+          <label class="form-field form-col">
+            <span>Contato de emergência (nome e parentesco)</span>
+            <input type="text" name="emergencia" required>
+          </label>
+
+          <label class="form-field form-col">
+            <span>Endereço</span>
+            <input type="text" name="endereco" required>
+          </label>
+
+          <label class="form-field form-col">
+            <span>Frase que define quem você é</span>
+            <textarea name="frase" rows="3" required></textarea>
+          </label>
+        </div>
+
+        <h3 class="form-title"><span>Anexos</span></h3>
+        <div class="form-grid">
+          <label class="form-field form-col">
+            <span>Documento de identificação com foto (RG, CNH ou outro)</span>
+            <input type="file" name="doc" accept="image/*,.pdf" required>
+          </label>
+
+          <label class="form-field form-col">
+            <span>Foto pessoal</span>
+            <input type="file" name="foto" accept="image/*" required>
+          </label>
+
+          <label class="form-field form-col">
+            <span>Foto com seu santo de devoção</span>
+            <input type="file" name="fotoSanto" accept="image/*" required>
+          </label>
+
+          <label class="form-field form-col" id="termField" hidden>
+            <span>Termo de responsabilidade (obrigatório para menores de 18 anos)</span>
+            <input type="file" name="termo" id="termo" accept="image/*,.pdf">
+          </label>
+
+          <label class="form-field form-col">
+            <span>Justificativa de chegada no sábado</span>
+            <input type="file" name="justificativa" accept="image/*,.pdf">
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn">Enviar inscrição</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const CODE = 'RC#26*';
+      const input = document.getElementById('accessCode');
+      const submit = document.getElementById('codeSubmit');
+      const error = document.getElementById('codeError');
+      const wrapper = document.getElementById('formWrapper');
+      const gate = document.getElementById('codeGate');
+      const statusBox = document.getElementById('statusBox');
+
+      const check = () => {
+        const ok = input.value === CODE;
+        error.hidden = ok;
+        if (ok) {
+          wrapper.hidden = false;
+          gate.hidden = true;
+          if (statusBox) { statusBox.hidden = true; statusBox.style.display = 'none'; statusBox.setAttribute('aria-hidden','true'); }
+        } else {
+          wrapper.hidden = true;
+          gate.hidden = false;
+          if (statusBox) { statusBox.hidden = false; statusBox.style.display = ''; statusBox.removeAttribute('aria-hidden'); }
+        }
+      };
+
+      submit.addEventListener('click', check);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); check(); } });
+
+      function limpa(v){return (v||'').replace(/\D/g,'');}
+      function cpfValido(cpf){
+        const c = limpa(cpf);
+        if (!c || c.length !== 11 || /^([0-9])\1{10}$/.test(c)) return false;
+        const calc=(b)=>{let s=0; for(let i=0;i<b;i++) s+=parseInt(c[i],10)*(b+1-i); const r=(s*10)%11; return r===10?0:r;};
+        return calc(9)===parseInt(c[9],10) && calc(10)===parseInt(c[10],10);
+      }
+      const cpfInput = document.getElementById('cpf');
+      cpfInput.addEventListener('input', () => {
+        const v = limpa(cpfInput.value);
+        let m = v;
+        if (v.length > 9) m = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) m = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+        else if (v.length > 3) m = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+        cpfInput.value = m;
+      });
+      const nascInput = document.querySelector('input[name="nascimento"]');
+      const termField = document.getElementById('termField');
+      const termoInput = document.getElementById('termo');
+      function ageFrom(d){
+        try{const dt=new Date(d); if(isNaN(dt)) return null; const today=new Date(); let age=today.getFullYear()-dt.getFullYear(); const m=today.getMonth()-dt.getMonth(); if(m<0 || (m===0 && today.getDate()<dt.getDate())) age--; return age; }catch{return null}
+      }
+      function toggleTerm(){
+        const age=ageFrom(nascInput.value);
+        const minor = age!==null && age<=17;
+        termField.hidden = !minor;
+        if(minor){ termoInput.setAttribute('required','required'); }
+        else { termoInput.removeAttribute('required'); termoInput.value=''; }
+      }
+      nascInput.addEventListener('change', toggleTerm);
+      nascInput.addEventListener('input', toggleTerm);
+      toggleTerm();
+      document.getElementById('inscricaoForm').addEventListener('submit', async (e) => {
+        if (!cpfValido(cpfInput.value)) {
+          e.preventDefault();
+          alert('CPF inválido');
+          return;
+        }
+        toggleTerm();
+        try {
+          const c = limpa(cpfInput.value);
+          const r = await fetch(`/inscricao/status?cpf=${c}`);
+          const data = await r.json();
+          if (data.exists) {
+            e.preventDefault();
+            if (data.paid) {
+              alert('CPF já cadastrado e pagamento aprovado. Sua inscrição está confirmada.');
+            } else {
+              alert('CPF já cadastrado. Você será redirecionado para concluir o pagamento.');
+              location.href = data.paymentUrl;
+            }
+          }
+        } catch {}
+      });
+
+      const statusCpf = document.getElementById('statusCpf');
+      statusCpf.addEventListener('input', () => {
+        const v = limpa(statusCpf.value);
+        let m = v;
+        if (v.length > 9) m = v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, '$1.$2.$3-$4');
+        else if (v.length > 6) m = v.replace(/(\d{3})(\d{3})(\d{0,3})/, '$1.$2.$3');
+        else if (v.length > 3) m = v.replace(/(\d{3})(\d{0,3})/, '$1.$2');
+        statusCpf.value = m;
+      });
+      const statusBtn = document.getElementById('statusBtn');
+      const statusMsg = document.getElementById('statusMsg');
+      statusBtn.addEventListener('click', async () => {
+        const c = limpa(statusCpf.value);
+        if (!c || c.length !== 11 || /^([0-9])\1{10}$/.test(c)) { statusMsg.textContent = 'CPF inválido'; return; }
+        try {
+          const r = await fetch(`/inscricao/status?cpf=${c}`);
+          const data = await r.json();
+          if (!data.exists) { statusMsg.textContent = 'CPF não encontrado. Faça sua inscrição.'; return; }
+          if (data.paid) { statusMsg.textContent = 'Pagamento aprovado. Sua inscrição está confirmada.'; return; }
+          statusMsg.textContent = 'Pagamento pendente. Redirecionando para a página de pagamento...';
+          location.href = data.paymentUrl;
+        } catch(e){ statusMsg.textContent = 'Erro ao verificar. Tente novamente.'; }
+      });
+    })();
+  </script>
+</section>

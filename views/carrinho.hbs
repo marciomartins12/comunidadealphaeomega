@@ -1,0 +1,135 @@
+<section class="shop">
+  <div class="container shop-inner">
+    <div class="shop-hero">
+      <div class="shop-hero-top">
+        <p class="shop-hero-title">Carrinho</p>
+        <div class="shop-oval"><img class="shop-oval-img" src="/public/img/loja/logoSTORE.png" alt="RC Store"/></div>
+      </div>
+    </div>
+    <div class="shop-topbar"><a class="shop-back" href="/loja">Voltar para a loja</a><a class="shop-hist" href="#" id="histBtn">Ver histórico de compras</a></div>
+    <h2 class="shop-title">Itens</h2>
+    {{#if items.length}}
+      {{#each items}}
+        <div class="shop-product" data-id="{{id}}">
+          <div class="shop-product-media">
+            <img class="shop-product-img" src="{{image}}" alt="{{name}}"/>
+          </div>
+          <p class="shop-product-desc">{{name}}</p>
+          <div class="cart-controls" style="margin-top:12px;">
+            <div class="cart-control">
+              <label>Tamanho</label>
+              <select class="insc-input cart-select">
+                <option {{#if selPP}}selected{{/if}}>PP</option>
+                <option {{#if selP}}selected{{/if}}>P</option>
+                <option {{#if selM}}selected{{/if}}>M</option>
+                <option {{#if selG}}selected{{/if}}>G</option>
+                <option {{#if selXG}}selected{{/if}}>XG</option>
+              </select>
+            </div>
+            <div class="cart-control">
+              <label>Quantidade</label>
+              <div class="qty">
+                <button type="button" class="qty-btn minus">-</button>
+                <input type="number" class="insc-input qty-input" min="1" max="99" value="{{qty}}"/>
+                <button type="button" class="qty-btn plus">+</button>
+              </div>
+            </div>
+          </div>
+          <p class="shop-product-price">{{priceBRL}} × {{qty}}</p>
+          <div class="shop-product-actions-item">
+            <button type="button" class="btn-remove">Remover</button>
+          </div>
+        </div>
+      {{/each}}
+      <p class="shop-product-price">Total: {{totalBRL}}</p>
+      <div class="shop-product-actions">
+        <a class="btn-buy" id="checkoutBtn" href="#">Pagar</a>
+      </div>
+    {{else}}
+      <p class="shop-product-desc">Seu carrinho está vazio</p>
+    {{/if}}
+  </div>
+</section>
+<script>
+(function(){
+  document.querySelectorAll('.shop-product').forEach(prod => {
+    const id = prod.getAttribute('data-id');
+    const sizeEl = prod.querySelector('.cart-select');
+    const qtyEl = prod.querySelector('.qty-input');
+    const minus = prod.querySelector('.qty-btn.minus');
+    const plus = prod.querySelector('.qty-btn.plus');
+    const del = prod.querySelector('.btn-remove');
+    const send = async () => {
+      try {
+        const r = await fetch('/cart/item/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, size: sizeEl.value, qty: qtyEl.value }) });
+        if (r.status === 200) { window.location.reload(); }
+      } catch {}
+    };
+    if (sizeEl) sizeEl.addEventListener('change', send);
+    if (qtyEl) qtyEl.addEventListener('change', send);
+    if (minus) minus.addEventListener('click', () => { const v = Math.max(1, parseInt(qtyEl.value || '1', 10) - 1); qtyEl.value = v; send(); });
+    if (plus) plus.addEventListener('click', () => { const v = Math.min(99, parseInt(qtyEl.value || '1', 10) + 1); qtyEl.value = v; send(); });
+    if (del) del.addEventListener('click', async () => {
+      try {
+        const r = await fetch('/cart/item/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+        if (r.status === 200) { window.location.reload(); }
+      } catch {}
+    });
+  });
+  const btn = document.getElementById('checkoutBtn');
+  if (btn) {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const r = await fetch('/carrinho/checkout', { method: 'POST' });
+        if (r.redirected) { window.location.href = r.url; return; }
+        const t = await r.text(); alert(t || 'Falha ao iniciar pagamento');
+      } catch {}
+    });
+  }
+  const hbtn = document.getElementById('histBtn');
+  const getEls = () => ({
+    overlay: document.getElementById('histOverlay'),
+    modal: document.getElementById('histModal'),
+    closeBtn: document.getElementById('histClose'),
+    list: document.getElementById('histList')
+  });
+  const open = () => { const { overlay, modal } = getEls(); if (overlay) overlay.hidden = false; if (modal) modal.hidden = false; };
+  const close = () => { const { overlay, modal } = getEls(); if (overlay) overlay.hidden = true; if (modal) modal.hidden = true; };
+  if (hbtn) hbtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      const r = await fetch('/carrinho/historico');
+      const data = await r.json();
+      const { list } = getEls();
+      if (list) list.innerHTML = '';
+      if (data.ok && data.orders && data.orders.length) {
+        data.orders.forEach(o => {
+          const div = document.createElement('div');
+          div.className = 'hist-item';
+          const its = o.items.map(i => `${i.name} (${i.size}) × ${i.qty} — ${i.price}`).join('<br/>');
+          div.innerHTML = `<div class="hist-row"><strong>Pedido #${o.id}</strong><span>${o.paid_at || ''}</span></div><div class="hist-items">${its}</div><div class="hist-total">Total: ${o.total}</div>`;
+          if (list) list.appendChild(div);
+        });
+      } else {
+        const p = document.createElement('p'); p.textContent = 'Nenhuma compra paga encontrada.'; if (list) list.appendChild(p);
+      }
+      open();
+      const { overlay, closeBtn } = getEls();
+      if (overlay) overlay.addEventListener('click', close);
+      if (closeBtn) closeBtn.addEventListener('click', close);
+    } catch { open(); }
+  });
+})();
+</script>
+
+<div class="modal-backdrop" id="histOverlay" hidden></div>
+<div class="modal" id="histModal" hidden>
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h3 class="modal-title">Histórico de compras</h3>
+      <button type="button" class="modal-close" id="histClose">×</button>
+    </div>
+    <div class="modal-content" id="histList"></div>
+  </div>
+  </div>

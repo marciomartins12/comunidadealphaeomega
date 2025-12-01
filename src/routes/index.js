@@ -1,0 +1,47 @@
+const express = require('express');
+const router = express.Router();
+const pages = require('../controllers/pagesController');
+const auth = require('../controllers/authController');
+const cart = require('../controllers/cartController');
+const db = require('../mysql');
+
+router.get('/', pages.home);
+router.get('/sobre', pages.sobre);
+router.get('/inscricao', pages.inscricao);
+router.post('/inscricao', (req, res, next) => {
+  const up = req.app.locals.upload;
+  up.fields([
+    { name: 'doc', maxCount: 1 },
+    { name: 'foto', maxCount: 1 },
+    { name: 'fotoSanto', maxCount: 1 },
+    { name: 'termo', maxCount: 1 },
+    { name: 'justificativa', maxCount: 1 }
+  ])(req, res, (err) => err ? next(err) : pages.inscricaoPost(req, res, next));
+});
+router.get('/inscricao/status', pages.inscricaoStatus);
+router.get('/loja', pages.loja);
+router.get('/login', auth.loginPage);
+router.post('/login', auth.loginPost);
+router.post('/register', auth.registerPost);
+router.get('/logout', auth.logout);
+router.post('/cart/add', cart.add);
+router.get('/carrinho', cart.view);
+router.post('/cart/item/update', cart.updateItem);
+router.post('/cart/item/delete', cart.deleteItem);
+router.post('/carrinho/checkout', cart.checkout);
+router.get('/loja/pagamento/:id', cart.pagamentoLoja);
+router.get('/loja/pagamento/status/:id', cart.pagamentoLojaStatus);
+router.get('/carrinho/historico', cart.historico);
+router.get('/status/db', async (req, res) => {
+  try { await db.ping(); res.json({ ok: true }); }
+  catch (e) { res.status(500).json({ ok: false, error: e.message }); }
+});
+router.get('/revista/:slug', pages.revista);
+router.get('/galeria', pages.galeria);
+router.get('/documentario', pages.documentario);
+router.get('/agenda', pages.agenda);
+router.get('/pagamento/:id', pages.pagamento);
+router.get('/pagamento/status/:id', pages.pagamentoStatus);
+router.post('/webhook/mercadopago', express.json({ type: 'application/json' }), pages.mercadoPagoWebhook);
+
+module.exports = router;

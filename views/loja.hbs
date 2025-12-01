@@ -1,0 +1,120 @@
+<section class="shop">
+  <div class="container shop-inner">
+    <div class="shop-hero">
+      <div class="shop-hero-top">
+        <p class="shop-hero-title">LOJA OFICIAL DO RETIRO ALFA&ÔMEGA</p>
+        <div class="shop-oval"><img class="shop-oval-img" src="/public/img/loja/logoSTORE.png" alt="RC Store"/></div>
+      </div>
+    </div>
+
+    <h2 class="shop-title">CAMISA OFICIAL<br/>2026 :D</h2>
+
+  <div class="shop-product">
+    <div class="shop-product-media">
+      <img id="prodImg" class="shop-product-img" src="/public/img/loja/MODELOQUADRINHOSANTOSP&BBRANCAOVERSIZED.png" alt="Camisa oficial 2026"/>
+    </div>
+    <div class="shop-thumbs">
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/FRENTEMODELOQUADRINHOSANTOSP&BBRANCAOVERSIZED.png">Frente</button>
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/MODELOQUADRINHOSANTOSP&BBRANCAOVERSIZED.png">Costas</button>
+    </div>
+    <p class="shop-product-desc">Modelo quadrinho santos P&B - branca oversized</p>
+    <p class="shop-product-price">R$68,00</p>
+    <div class="shop-thumbs" style="margin-top:12px;">
+      <label style="margin-left:0;">Quantidade</label>
+      <input type="number" class="insc-input qty-input" min="1" max="99" value="1" style="max-width:80px;"/>
+    </div>
+    <div class="shop-product-actions">
+      <a class="btn-buy add-to-cart" href="#" data-product-id="quadrinho_pb_branca">Adicionar ao carrinho</a>
+    </div>
+  </div>
+  <div class="shop-product">
+    <div class="shop-product-media">
+      <img class="shop-product-img" src="/public/img/loja/MODELOQUADRINHOSANTOSP&B-BRANCA.png" alt="Camisa oficial 2026"/>
+    </div>
+    <div class="shop-thumbs">
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/FRENTEMODELOQUADRINHOSANTOSP&B-BRANCA.png">Frente</button>
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/MODELOQUADRINHOSANTOSP&B-BRANCA.png">Costas</button>
+    </div>
+    <p class="shop-product-desc">Modelo quadrinho santos P&B - branca regular</p>
+    <p class="shop-product-price">R$68,00</p>
+    <div class="shop-thumbs" style="margin-top:12px;">
+      <label style="margin-left:0;">Quantidade</label>
+      <input type="number" class="insc-input qty-input" min="1" max="99" value="1" style="max-width:80px;"/>
+    </div>
+    <div class="shop-product-actions">
+      <a class="btn-buy add-to-cart" href="#" data-product-id="quadrinho_pb_branca_regular">Adicionar ao carrinho</a>
+    </div>
+  </div>
+  <div class="shop-product">
+    <div class="shop-product-media">
+      <img class="shop-product-img" src="/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png" alt="Camisa oficial 2026"/>
+    </div>
+    <div class="shop-thumbs">
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/FRENTEMODELOQUADRINHOSANTOSCOLORPRETA.png">Frente</button>
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png">Costas</button>
+    </div>
+    <p class="shop-product-desc">Modelo quadrinho santos color - preta oversized</p>
+    <p class="shop-product-price">R$68,00</p>
+    <div class="shop-thumbs" style="margin-top:12px;">
+      <label style="margin-left:0;">Quantidade</label>
+      <input type="number" class="insc-input qty-input" min="1" max="99" value="1" style="max-width:80px;"/>
+    </div>
+    <div class="shop-product-actions">
+      <a class="btn-buy add-to-cart" href="#" data-product-id="quadrinho_color_preta">Adicionar ao carrinho</a>
+    </div>
+  </div>
+  <div class="shop-product">
+    <div class="shop-product-media">
+      <img class="shop-product-img" src="/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png" alt="Camisa oficial 2026"/>
+    </div>
+    <div class="shop-thumbs">
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/FRENTEMODELOQUADRINHOSANTOSCOLORPRETA.png">Frente</button>
+      <button type="button" class="thumb-btn" data-src="/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png">Costas</button>
+    </div>
+    <p class="shop-product-desc">Modelo quadrinho santos color - preta regular</p>
+    <p class="shop-product-price">R$68,00</p>
+    <div class="shop-thumbs" style="margin-top:12px;">
+      <label style="margin-left:0;">Quantidade</label>
+      <input type="number" class="insc-input qty-input" min="1" max="99" value="1" style="max-width:80px;"/>
+    </div>
+    <div class="shop-product-actions">
+      <a class="btn-buy add-to-cart" href="#" data-product-id="quadrinho_color_preta_regular">Adicionar ao carrinho</a>
+    </div>
+  </div>
+  </div>
+</section>
+
+<div class="cart-fab" role="group" aria-label="Carrinho">
+  <a href="/carrinho" class="cart-fab-btn" aria-label="Abrir carrinho">🛒</a>
+  <span class="cart-fab-label">Carrinho</span>
+  </div>
+
+<script>
+(function(){
+  document.querySelectorAll('.shop-product').forEach(prod => {
+    const img = prod.querySelector('.shop-product-img');
+    prod.querySelectorAll('.thumb-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const src = btn.getAttribute('data-src');
+        if (src && img) img.setAttribute('src', src);
+      });
+    });
+    const btnBuy = prod.querySelector('.add-to-cart');
+    if (btnBuy) {
+      btnBuy.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const product_id = btnBuy.getAttribute('data-product-id');
+        const qtyEl = prod.querySelector('.qty-input');
+        const size = 'M';
+        const qty = qtyEl ? qtyEl.value : '1';
+        try {
+          const r = await fetch('/cart/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product_id, size, qty }) });
+          const data = await r.json();
+          if (r.status === 401) { window.location.href = data.loginUrl || '/login?next=/carrinho'; return; }
+          if (data.ok && data.redirect) { window.location.href = data.redirect; }
+        } catch {}
+      });
+    }
+  });
+})();
+</script>
