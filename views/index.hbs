@@ -10,6 +10,29 @@
     </div>
   </div>
 </section>
+<script>
+(function(){
+  document.addEventListener('DOMContentLoaded', function(){
+    const container = document.querySelector('.sponsors-marquee');
+    const track = document.querySelector('.sponsors-track');
+    if(!container||!track) return;
+    let pos = 0;
+    let running = true;
+    let speed = 0.4;
+    track.style.animation = 'none';
+    const loop = () => { if (running) { const w = track.scrollWidth; pos -= speed; if (pos <= -w) pos += w; track.style.transform = `translateX(${pos}px)`; } requestAnimationFrame(loop); };
+    loop();
+    let dragging = false, startX = 0, startPos = 0;
+    const endDrag = ()=>{ dragging = false; container.classList.remove('dragging'); running = true; };
+    container.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dragging = true; running = false; container.classList.add('dragging'); startX = e.clientX; startPos = pos; container.setPointerCapture && container.setPointerCapture(e.pointerId); });
+    container.addEventListener('pointermove', (e)=>{ if(!dragging) return; const dx = e.clientX - startX; pos = startPos + dx; track.style.transform = `translateX(${pos}px)`; });
+    container.addEventListener('pointerup', endDrag);
+    container.addEventListener('pointercancel', endDrag);
+    container.addEventListener('pointerleave', endDrag);
+    container.addEventListener('wheel', (e)=>{ e.preventDefault(); running = false; pos -= (e.deltaY || 0) + (e.deltaX || 0); track.style.transform = `translateX(${pos}px)`; clearTimeout(container._wt); container._wt = setTimeout(()=>{ running = true; }, 250); }, { passive: false });
+  });
+})();
+</script>
 
 <section class="poster">
   <div class="container poster-inner">
