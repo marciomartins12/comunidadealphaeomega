@@ -37,6 +37,7 @@ router.post('/carrinho/checkout', cart.checkout);
 router.get('/loja/pagamento/:id', cart.pagamentoLoja);
 router.get('/loja/pagamento/status/:id', cart.pagamentoLojaStatus);
 router.get('/carrinho/historico', cart.historico);
+router.get('/cart/count', cart.count);
 router.get('/status/db', async (req, res) => {
   try { await db.ping(); res.json({ ok: true }); }
   catch (e) { res.status(500).json({ ok: false, error: e.message }); }

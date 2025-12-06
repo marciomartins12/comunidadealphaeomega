@@ -10,40 +10,44 @@
     <h2 class="shop-title">Itens</h2>
     {{#if items.length}}
       {{#each items}}
-        <div class="shop-product" data-id="{{id}}">
-          <div class="shop-product-media">
-            <img class="shop-product-img" src="{{image}}" alt="{{name}}"/>
+        <div class="cart-item" data-id="{{id}}">
+          <div class="cart-item-media">
+            <img class="cart-item-img" src="{{image}}" alt="{{name}}"/>
           </div>
-          <p class="shop-product-desc">{{name}}</p>
-          <div class="cart-controls" style="margin-top:12px;">
-            <div class="cart-control">
-              <label>Tamanho</label>
-              <select class="insc-input cart-select">
-                <option {{#if selPP}}selected{{/if}}>PP</option>
-                <option {{#if selP}}selected{{/if}}>P</option>
-                <option {{#if selM}}selected{{/if}}>M</option>
-                <option {{#if selG}}selected{{/if}}>G</option>
-                <option {{#if selXG}}selected{{/if}}>XG</option>
-              </select>
+          <div class="cart-item-body">
+            <div class="cart-item-head">
+              <p class="cart-item-title">{{name}}</p>
             </div>
-            <div class="cart-control">
-              <label>Quantidade</label>
-              <div class="qty">
-                <button type="button" class="qty-btn minus">-</button>
-                <input type="number" class="insc-input qty-input" min="1" max="99" value="{{qty}}"/>
-                <button type="button" class="qty-btn plus">+</button>
+            <div class="cart-controls">
+              <div class="cart-control">
+                <label>Tamanho</label>
+                <select class="insc-input cart-select">
+                  <option {{#if selPP}}selected{{/if}}>PP</option>
+                  <option {{#if selP}}selected{{/if}}>P</option>
+                  <option {{#if selM}}selected{{/if}}>M</option>
+                  <option {{#if selG}}selected{{/if}}>G</option>
+                  <option {{#if selXG}}selected{{/if}}>XG</option>
+                </select>
+              </div>
+              <div class="cart-control">
+                <label>Quantidade</label>
+                <div class="qty">
+                  <button type="button" class="qty-btn minus">-</button>
+                  <input type="number" class="insc-input qty-input" min="1" max="99" value="{{qty}}"/>
+                  <button type="button" class="qty-btn plus">+</button>
+                </div>
               </div>
             </div>
+            <p class="cart-item-price">{{priceBRL}} × {{qty}}</p>
           </div>
-          <p class="shop-product-price">{{priceBRL}} × {{qty}}</p>
-          <div class="shop-product-actions-item">
-            <button type="button" class="btn-remove">Remover</button>
-          </div>
+          <button type="button" class="btn-remove cart-item-remove" aria-label="Remover">X</button>
         </div>
       {{/each}}
-      <p class="shop-product-price">Total: {{totalBRL}}</p>
-      <div class="shop-product-actions">
-        <a class="btn-buy" id="checkoutBtn" href="#">Pagar</a>
+      <div class="cart-fixedbar">
+        <div class="container cart-fixedbar-inner">
+          <p class="cart-fixed-total">Total: {{totalBRL}}</p>
+          <a class="btn-buy cart-fixed-pay" id="checkoutBtn" href="#">Pagar</a>
+        </div>
       </div>
     {{else}}
       <p class="shop-product-desc">Seu carrinho está vazio</p>
@@ -52,7 +56,7 @@
 </section>
 <script>
 (function(){
-  document.querySelectorAll('.shop-product').forEach(prod => {
+  document.querySelectorAll('.cart-item').forEach(prod => {
     const id = prod.getAttribute('data-id');
     const sizeEl = prod.querySelector('.cart-select');
     const qtyEl = prod.querySelector('.qty-input');

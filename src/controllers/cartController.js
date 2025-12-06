@@ -63,7 +63,7 @@ exports.view = async (req, res) => {
   }));
   const total = items.reduce((acc, it) => acc + Number(products[it.product_id]?.price ?? it.price) * Number(it.qty), 0);
   const valor = fmt.format(total);
-  res.render('carrinho', { pageTitle: 'Carrinho', items: mapped, totalBRL: valor });
+  res.render('carrinho', { pageTitle: 'Carrinho', items: mapped, totalBRL: valor, pageClass: 'cart-page' });
 };
 
 exports.updateItem = async (req, res) => {
@@ -190,4 +190,16 @@ exports.historico = async (req, res) => {
     }
   }
   res.json({ ok: true, orders: out });
+};
+
+exports.count = async (req, res) => {
+  try {
+    const u = req.session.user;
+    if (!u) return res.json({ ok: true, count: 0 });
+    const items = await getCartItemsForUser(u.id);
+    const count = (items || []).reduce((acc, it) => acc + Number(it.qty || 0), 0);
+    res.json({ ok: true, count });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
 };
