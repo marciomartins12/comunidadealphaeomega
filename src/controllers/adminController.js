@@ -32,11 +32,15 @@ exports.requireAdmin = (req, res, next) => {
 
 exports.dashboard = async (req, res) => {
   const [insc, orders, donations] = await Promise.all([listPaidInscricoes(), listPaidOrdersDetailed(), listPaidDonations()]);
+  const fee = 0.0099;
+  const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const netTotal = orders.reduce((acc, o) => acc + Number(o.total || 0) * (1 - fee), 0);
   res.render('admin/dashboard', {
     pageTitle: 'Dashboard do Administrador',
     inscCount: insc.length,
     ordersCount: orders.length,
-    donationsCount: donations.length
+    donationsCount: donations.length,
+    ordersNetBRL: money.format(netTotal)
   });
 };
 
