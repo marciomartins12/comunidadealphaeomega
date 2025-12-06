@@ -31,6 +31,11 @@ body {
 .site-header {
   background: var(--black);
   color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 1000;
 }
 .header-inner {
@@ -39,6 +44,9 @@ body {
   justify-content: space-between;
   height: 64px;
 }
+
+/* Compensa a altura do cabeçalho fixo */
+.content { padding-top: 64px; }
 .brand { text-decoration: none; color: #fff; display: inline-flex; flex-direction: column; }
 .brand-top { font-size: 12px; letter-spacing: 1px; opacity: 0.9; }
 .brand-main { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 28px; line-height: 1; }
