@@ -1,45 +1,67 @@
 <section class="auth">
   <div class="container auth-inner">
-    <h2 class="shop-title">Entrar</h2>
-    {{#if error}}<p class="insc-error">{{error}}</p>{{/if}}
-    <div class="form-wrapper">
-      <div class="form-card">
-        <div class="form-field form-col">
-          <form method="post" action="/login">
-            <input type="hidden" name="next" value="{{next}}"/>
-            <div class="form-field"><span>Email</span><input type="email" name="email" required/></div>
-            <div class="form-field"><span>Senha</span><input type="password" name="senha" required/></div>
-            <div class="form-actions"><button class="btn" type="submit">Entrar</button></div>
-          </form>
-        </div>
-        <div class="form-field form-col auth-toggle">
-          <button class="footer-back" id="toggleRegister" type="button">Criar conta</button>
-        </div>
-        <div id="registerBox" class="form-field form-col auth-register">
-          <h2 class="shop-title">Criar conta</h2>
-          <form method="post" action="/register">
-            <input type="hidden" name="next" value="{{next}}"/>
-            <div class="form-field"><span>Nome</span><input type="text" name="nome" required/></div>
-            <div class="form-field"><span>Email</span><input type="email" name="email" required/></div>
-            <div class="form-field"><span>Senha</span><input type="password" name="senha" required/></div>
-            <div class="form-field"><span>CPF</span><input type="text" name="cpf" required/></div>
-            <div class="form-field"><span>Cidade</span><input type="text" name="cidade" required/></div>
-            <div class="form-actions"><button class="btn" type="submit">Criar conta</button></div>
-          </form>
-        </div>
+    <div class="auth-card">
+      <div class="auth-brand">
+        <img class="shop-oval-img" src="/public/img/loja/logoSTORE.png" alt="RC Store"/>
+        <h2 class="auth-title">Entrar</h2>
+        <p class="auth-subtitle">Acesse sua conta para comprar na loja</p>
+      </div>
+      {{#if error}}<p class="insc-error">{{error}}</p>{{/if}}
+      {{#if success}}<p class="shop-product-desc">{{success}}</p>{{/if}}
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabLogin">Entrar</button>
+        <button type="button" class="auth-tab" id="tabRegister">Criar conta</button>
+        <button type="button" class="auth-tab" id="tabRecover">Recuperar senha</button>
+      </div>
+      <div class="auth-forms">
+        <form id="loginForm" class="auth-form" method="post" action="/login">
+          <input type="hidden" name="next" value="{{next}}"/>
+          <div class="form-field"><span>Email</span><input class="auth-input" type="email" name="email" required/></div>
+          <div class="form-field"><span>Senha</span><input class="auth-input" type="password" name="senha" required/></div>
+          <div class="form-actions"><button class="btn" type="submit">Entrar</button></div>
+        </form>
+        <form id="registerForm" class="auth-form" method="post" action="/register" style="display:none">
+          <input type="hidden" name="next" value="{{next}}"/>
+          <div class="form-field"><span>Nome</span><input class="auth-input" type="text" name="nome" required/></div>
+          <div class="form-field"><span>Email</span><input class="auth-input" type="email" name="email" required/></div>
+          <div class="form-field"><span>Senha</span><input class="auth-input" type="password" name="senha" required/></div>
+          <div class="form-field"><span>CPF</span><input class="auth-input" type="text" name="cpf" required/></div>
+          <div class="form-field"><span>Cidade</span><input class="auth-input" type="text" name="cidade" required/></div>
+          <div class="form-actions"><button class="btn" type="submit">Criar conta</button></div>
+        </form>
+        <form id="recoverForm" class="auth-form" method="post" action="/password/reset" style="display:none">
+          <input type="hidden" name="next" value="{{next}}"/>
+          <div class="form-field"><span>Email</span><input class="auth-input" type="email" name="email" required/></div>
+          <div class="form-field"><span>CPF</span><input class="auth-input" type="text" name="cpf" required/></div>
+          <div class="form-field"><span>Nova senha</span><input class="auth-input" type="password" name="senha" required/></div>
+          <div class="form-actions"><button class="btn" type="submit">Atualizar senha</button></div>
+        </form>
       </div>
     </div>
   </div>
 </section>
 <script>
 (function(){
-  const btn = document.getElementById('toggleRegister');
-  const box = document.getElementById('registerBox');
-  if (btn && box) {
-    btn.addEventListener('click', () => {
-      const isHidden = getComputedStyle(box).display === 'none';
-      box.style.display = isHidden ? 'block' : 'none';
-    });
+  const tabs = {
+    login: document.getElementById('tabLogin'),
+    register: document.getElementById('tabRegister'),
+    recover: document.getElementById('tabRecover'),
+  };
+  const forms = {
+    login: document.getElementById('loginForm'),
+    register: document.getElementById('registerForm'),
+    recover: document.getElementById('recoverForm'),
+  };
+  function activate(name){
+    forms.login.style.display = name === 'login' ? 'block' : 'none';
+    forms.register.style.display = name === 'register' ? 'block' : 'none';
+    forms.recover.style.display = name === 'recover' ? 'block' : 'none';
+    tabs.login.classList.toggle('active', name === 'login');
+    tabs.register.classList.toggle('active', name === 'register');
+    tabs.recover.classList.toggle('active', name === 'recover');
   }
+  tabs.login && tabs.login.addEventListener('click', () => activate('login'));
+  tabs.register && tabs.register.addEventListener('click', () => activate('register'));
+  tabs.recover && tabs.recover.addEventListener('click', () => activate('recover'));
 })();
 </script>

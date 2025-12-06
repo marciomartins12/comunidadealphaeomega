@@ -28,6 +28,7 @@ router.get('/loja', pages.loja);
 router.get('/login', auth.loginPage);
 router.post('/login', auth.loginPost);
 router.post('/register', auth.registerPost);
+router.post('/password/reset', auth.resetPasswordPost);
 router.get('/logout', auth.logout);
 router.post('/cart/add', cart.add);
 router.get('/carrinho', cart.view);

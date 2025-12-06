@@ -425,8 +425,23 @@ body.modal-open { overflow: hidden; }
 .cart-badge { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; background: #c62828; color: #fff; border: 1px solid var(--black); border-radius: 999px; font-size: 12px; font-weight: 900; box-shadow: 0 2px 0 rgba(0,0,0,0.4); }
 .cart-fab-label { display: none; }
 
-.auth { background: #fff; padding: 40px 0; margin: 0; }
-.auth-inner { display: grid; gap: 16px; justify-items: start; text-align: left; }
+.auth { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); padding: 40px 0; margin: 0; }
+.auth-inner { display: grid; place-items: center; text-align: center; }
+.auth-card { width: 100%; max-width: 500px; background: #fff; color: var(--black); border: 1px solid var(--black); border-radius: 14px; box-shadow: 0 16px 32px rgba(0,0,0,0.14); padding: 24px; display: grid; gap: 18px; }
+.auth-brand { display: grid; gap: 8px; justify-items: center; }
+.auth-brand .shop-oval-img { width: 120px; height: auto; }
+.auth-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 26px; margin: 0; color: var(--black); }
+.auth-subtitle { font-size: 13px; font-weight: 700; color: var(--text); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.auth-tab { display: inline-flex; align-items: center; justify-content: center; padding: 10px 12px; border: 1px solid var(--black); border-radius: 999px; background: var(--yellow); color: var(--black); font-weight: 900; cursor: pointer; transition: background 180ms ease, color 180ms ease; }
+.auth-tab.active { background: var(--black); color: var(--yellow); }
+.auth-forms { display: grid; gap: 14px; text-align: left; }
+.auth-form { display: grid; gap: 12px; }
+.auth-form .form-field span { font-size: 12px; font-weight: 700; color: var(--text); }
+.auth-input { width: 100%; padding: 12px 14px; border: 1px solid var(--black); border-radius: 10px; font-size: 14px; }
+.auth-input:focus { outline: none; border-color: var(--black); box-shadow: 0 0 0 2px rgba(0,0,0,0.08); }
+.auth .form-actions { display: flex; justify-content: center; }
+.auth .btn { width: 100%; }
 .auth-register { display: none; }
 .auth-toggle { margin-top: 24px; }
 .bio-card { display: grid; gap: 12px; }

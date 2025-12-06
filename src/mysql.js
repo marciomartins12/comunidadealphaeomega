@@ -267,6 +267,14 @@ exports.getUserByCpf = async (cpf) => {
   } finally { conn.release(); }
 };
 
+exports.updateUserPasswordByEmailCpf = async ({ email, cpf, senha_hash }) => {
+  const conn = await pool.getConnection();
+  try {
+    const [r] = await conn.execute('UPDATE users SET senha_hash = ? WHERE email = ? AND cpf = ?', [senha_hash, email, cpf]);
+    return r.affectedRows || 0;
+  } finally { conn.release(); }
+};
+
 exports.addCartItem = async ({ user_id, product_id, name, size, qty, price }) => {
   const conn = await pool.getConnection();
   try {

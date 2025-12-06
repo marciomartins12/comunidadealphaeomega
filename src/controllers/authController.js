@@ -1,4 +1,4 @@
-const { createUser, getUserByEmail, getUserByCpf } = require('../mysql');
+const { createUser, getUserByEmail, getUserByCpf, updateUserPasswordByEmailCpf } = require('../mysql');
 const bcrypt = require('bcryptjs');
 
 exports.loginPage = (req, res) => {
@@ -45,4 +45,23 @@ exports.registerPost = async (req, res) => {
 
 exports.logout = (req, res) => {
   req.session.destroy(() => res.redirect('/'));
+};
+
+exports.resetPasswordPost = async (req, res) => {
+  try {
+    const { email, cpf, senha, next } = req.body;
+    const emailNorm = String(email || '').toLowerCase();
+    const cpfNorm = String(cpf || '').replace(/\D/g, '');
+    if (!emailNorm || !cpfNorm || !senha) return res.status(400).render('login', { pageTitle: 'Entrar', next: next || '/carrinho', error: 'Preencha email, CPF e nova senha' });
+    if (cpfNorm.length !== 11) return res.status(400).render('login', { pageTitle: 'Entrar', next: next || '/carrinho', error: 'CPF inválido' });
+    const u = await getUserByEmail(emailNorm);
+    if (!u || String(u.cpf).replace(/\D/g, '') !== cpfNorm) return res.status(404).render('login', { pageTitle: 'Entrar', next: next || '/carrinho', error: 'Email ou CPF não encontrados' });
+    if (String(senha).length < 6) return res.status(400).render('login', { pageTitle: 'Entrar', next: next || '/carrinho', error: 'A nova senha deve ter pelo menos 6 caracteres' });
+    const hash = await bcrypt.hash(senha, 10);
+    const updated = await updateUserPasswordByEmailCpf({ email: emailNorm, cpf: cpfNorm, senha_hash: hash });
+    if (!updated) return res.status(400).render('login', { pageTitle: 'Entrar', next: next || '/carrinho', error: 'Não foi possível atualizar a senha' });
+    res.render('login', { pageTitle: 'Entrar', next: next || '/carrinho', success: 'Senha atualizada com sucesso. Faça login.' });
+  } catch (e) {
+    res.status(500).render('login', { pageTitle: 'Entrar', next: req.body.next || '/carrinho', error: 'Erro ao recuperar senha' });
+  }
 };
