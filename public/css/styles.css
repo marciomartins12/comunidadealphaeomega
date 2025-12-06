@@ -488,3 +488,13 @@ body.modal-open { overflow: hidden; }
   .agenda-title { font-size: 40px; }
   .agenda-date { font-size: 20px; }
 }
+
+.table-wrap { width: 100%; overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid rgba(0,0,0,0.12); border-radius: 12px; }
+.data-table thead th { background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end)); color: var(--black); font-weight: 900; text-align: left; padding: 12px 14px; border-bottom: 2px solid rgba(0,0,0,0.16); }
+.data-table tbody td { padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,0.08); font-size: 14px; }
+.data-table tbody tr:nth-child(odd) { background: #fff; }
+.data-table tbody tr:nth-child(even) { background: #f9f9f9; }
+.data-table tbody tr:hover { background: rgba(0,0,0,0.04); }
+.data-table th:first-child, .data-table td:first-child { padding-left: 16px; }
+.data-table th:last-child, .data-table td:last-child { padding-right: 16px; }

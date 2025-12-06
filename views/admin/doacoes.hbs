@@ -1,0 +1,29 @@
+<section class="shop">
+  <div class="container shop-inner">
+    <h2 class="shop-title">Gerenciar doações</h2>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-field form-col">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Nome</th><th>Contato</th><th>Valor</th><th>Status</th><th>Pago em</th><th>Criado em</th></tr>
+            </thead>
+            <tbody>
+              {{#each rows}}
+              <tr>
+                <td>{{this.id}}</td>
+                <td>{{this.nome}}</td>
+                <td>{{this.contato}}</td>
+                <td>{{this.amount}}</td>
+                <td>{{this.mp_status}}</td>
+                <td>{{this.paid_at}}</td>
+                <td>{{this.created_at}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

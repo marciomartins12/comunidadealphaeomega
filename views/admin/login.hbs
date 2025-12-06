@@ -1,0 +1,15 @@
+<section class="auth">
+  <div class="container auth-inner">
+    <h2 class="shop-title">Entrar como administrador</h2>
+    {{#if error}}<p class="insc-error">{{error}}</p>{{/if}}
+    <div class="form-wrapper">
+      <div class="form-card">
+        <form method="post" action="/admin/login">
+          <div class="form-field"><span>Email</span><input type="email" name="email" required/></div>
+          <div class="form-field"><span>Senha</span><input type="password" name="senha" required/></div>
+          <div class="form-actions"><button class="btn" type="submit">Entrar</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  </section>

@@ -3,6 +3,7 @@ const router = express.Router();
 const pages = require('../controllers/pagesController');
 const auth = require('../controllers/authController');
 const cart = require('../controllers/cartController');
+const admin = require('../controllers/adminController');
 const db = require('../mysql');
 
 router.get('/', pages.home);
@@ -49,6 +50,17 @@ router.get('/documentario', pages.documentario);
 router.get('/agenda', pages.agenda);
 router.get('/pagamento/:id', pages.pagamento);
 router.get('/pagamento/status/:id', pages.pagamentoStatus);
-router.post('/webhook/mercadopago', express.json({ type: 'application/json' }), pages.mercadoPagoWebhook);
+router.get('/webhook/mercadopago', express.json({ type: 'application/json' }), pages.mercadoPagoWebhook);
+
+// Admin
+router.get('/admin/login', admin.loginPage);
+router.post('/admin/login', admin.loginPost);
+router.get('/admin/logout', admin.logout);
+router.get('/admin', admin.requireAdmin, admin.dashboard);
+router.get('/admin/inscricoes', admin.requireAdmin, admin.viewInscricoes);
+router.get('/admin/pedidos', admin.requireAdmin, admin.viewPedidos);
+router.get('/admin/doacoes', admin.requireAdmin, admin.viewDoacoes);
+router.get('/admin/admins/new', admin.requireAdmin, admin.adminCreatePage);
+router.post('/admin/admins/new', admin.requireAdmin, admin.adminCreatePost);
 
 module.exports = router;

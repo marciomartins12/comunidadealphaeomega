@@ -36,7 +36,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
-app.use((req, res, next) => { res.locals.user = req.session.user || null; next(); });
+app.use((req, res, next) => { res.locals.user = req.session.user || null; res.locals.admin = req.session.admin || null; next(); });
 app.use('/', routes);
 
 const PORT = process.env.PORT || 3000;

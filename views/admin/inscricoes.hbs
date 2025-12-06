@@ -1,0 +1,30 @@
+<section class="shop">
+  <div class="container shop-inner">
+    <h2 class="shop-title">Inscrições pagas</h2>
+    {{#if count}}
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-field form-col table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Nome</th><th>CPF</th><th>Pago em</th><th>ID</th></tr>
+            </thead>
+            <tbody>
+              {{#each rows}}
+              <tr>
+                <td>{{this.nome}}</td>
+                <td>{{this.cpf}}</td>
+                <td>{{this.paid_at_br}}</td>
+                <td>{{this.id}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {{else}}
+      <p class="insc-error">Nenhuma inscrição paga encontrada.</p>
+    {{/if}}
+  </div>
+</section>

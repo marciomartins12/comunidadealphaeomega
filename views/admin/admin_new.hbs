@@ -1,0 +1,18 @@
+<section class="shop">
+  <div class="container shop-inner">
+    <h2 class="shop-title">Criar novo administrador</h2>
+    {{#if error}}<p class="insc-error">{{error}}</p>{{/if}}
+    <div class="form-wrapper">
+      <div class="form-card">
+        <form method="post" action="/admin/admins/new">
+          <div class="form-grid">
+            <div class="form-field"><span>Nome</span><input type="text" name="nome" required/></div>
+            <div class="form-field"><span>Email</span><input type="email" name="email" required/></div>
+            <div class="form-field"><span>Senha</span><input type="password" name="senha" required/></div>
+          </div>
+          <div class="form-actions"><button class="btn" type="submit">Criar</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

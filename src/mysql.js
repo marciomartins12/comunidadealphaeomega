@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
+const bcrypt = require('bcryptjs');
 
 const DB_HOST = process.env.DB_HOST || 'localhost';
 const DB_PORT = Number(process.env.DB_PORT || 3306);
@@ -145,6 +146,21 @@ async function ensureSchema() {
       paid_at TIMESTAMP NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+    await conn.query(`CREATE TABLE IF NOT EXISTS admins (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      nome VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      senha_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY uniq_admin_email (email)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+    const [adm] = await conn.execute('SELECT id FROM admins WHERE email = ? LIMIT 1', ['marcio@gmail.com']);
+    if (!adm || adm.length === 0) {
+      const hash = await bcrypt.hash('admin123', 10);
+      await conn.execute('INSERT INTO admins (nome, email, senha_hash) VALUES (?,?,?)', ['Administrador', 'marcio@gmail.com', hash]);
+    }
   } finally { conn.release(); }
 }
 
@@ -458,5 +474,61 @@ exports.getDonationByPaymentId = async (mp_payment_id) => {
   try {
     const [rows] = await conn.execute('SELECT * FROM donations WHERE mp_payment_id = ? LIMIT 1', [mp_payment_id]);
     return rows[0] || null;
+  } finally { conn.release(); }
+};
+
+exports.createAdmin = async ({ nome, email, senha_hash }) => {
+  const conn = await pool.getConnection();
+  try {
+    const [r] = await conn.execute('INSERT INTO admins (nome, email, senha_hash) VALUES (?,?,?)', [nome, email, senha_hash]);
+    return r.insertId;
+  } finally { conn.release(); }
+};
+
+exports.getAdminByEmail = async (email) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT * FROM admins WHERE email = ? LIMIT 1', [email]);
+    return rows[0] || null;
+  } finally { conn.release(); }
+};
+
+exports.getAdminById = async (id) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT * FROM admins WHERE id = ? LIMIT 1', [id]);
+    return rows[0] || null;
+  } finally { conn.release(); }
+};
+
+exports.listInscricoes = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT id, nome, cpf, mp_status, paid_at, created_at FROM inscricoes ORDER BY created_at DESC');
+    return rows;
+  } finally { conn.release(); }
+};
+
+exports.listPaidInscricoes = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT id, nome, cpf, mp_status, paid_at, created_at FROM inscricoes WHERE mp_status = ? ORDER BY nome ASC', ['approved']);
+    return rows;
+  } finally { conn.release(); }
+};
+
+exports.listOrders = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT id, user_id, total, mp_status, paid_at, created_at FROM orders ORDER BY created_at DESC');
+    return rows;
+  } finally { conn.release(); }
+};
+
+exports.listDonations = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT id, nome, contato, amount, mp_status, paid_at, created_at FROM donations ORDER BY created_at DESC');
+    return rows;
   } finally { conn.release(); }
 };
