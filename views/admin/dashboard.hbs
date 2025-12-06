@@ -1,6 +1,10 @@
 <section class="shop">
   <div class="container shop-inner">
     <h2 class="shop-title">Dashboard do Administrador</h2>
+    <div class="shop-topbar">
+      <button type="button" class="btn" id="refreshOrdersBtn">Atualizar status dos pedidos</button>
+      <span id="refreshMsg"></span>
+    </div>
     <div class="feature-list">
       <a class="feature-item" href="/admin/inscricoes">
         <div class="feature-title">Inscrições</div>
@@ -18,6 +22,25 @@
         <div class="feature-title">Criar novo administrador</div>
         <p class="feature-desc">Adicionar acesso administrativo</p>
       </a>
+      
     </div>
   </div>
 </section>
+<script>
+(function(){
+  const btn = document.getElementById('refreshOrdersBtn');
+  const msg = document.getElementById('refreshMsg');
+  function setMsg(t){ if(msg) { msg.textContent = t; } }
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      try {
+        setMsg('Atualizando...');
+        const r = await fetch('/admin/pedidos/refresh');
+        const data = await r.json();
+        if (!data.ok) { setMsg('Falha ao atualizar'); return; }
+        setMsg(`Verificados: ${data.checked}, atualizados: ${data.updated}, aprovados: ${data.approved}`);
+      } catch { setMsg('Erro de rede'); }
+    });
+  }
+})();
+</script>

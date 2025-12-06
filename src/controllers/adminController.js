@@ -1,4 +1,5 @@
-const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations } = require('../mysql');
+const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus } = require('../mysql');
+const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
 
 exports.loginPage = (req, res) => {
@@ -108,5 +109,29 @@ exports.adminCreatePost = async (req, res) => {
   } catch (e) {
     const msg = (e && e.code === 'ER_DUP_ENTRY') ? 'Email já cadastrado' : 'Erro ao criar administrador';
     res.status(400).render('admin/admin_new', { pageTitle: 'Criar novo administrador', error: msg });
+  }
+};
+
+exports.refreshOrdersStatus = async (req, res) => {
+  try {
+    const orders = await listOrders();
+    let checked = 0, updated = 0, approved = 0;
+    for (const o of orders) {
+      if (!o.mp_payment_id) continue;
+      if ((o.mp_status || 'pending') === 'approved') continue;
+      try {
+        const info = await getPaymentStatus(o.mp_payment_id);
+        const status = info.status || (o.mp_status || 'pending');
+        checked++;
+        if (status !== (o.mp_status || 'pending')) {
+          updated++;
+          await updateOrderPaymentStatus(o.id, status);
+          if (status === 'approved') { approved++; await clearCartForUser(o.user_id); }
+        }
+      } catch {}
+    }
+    res.json({ ok: true, checked, updated, approved });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
   }
 };
