@@ -20,16 +20,33 @@
     let running = true;
     let speed = 0.4;
     track.style.animation = 'none';
-    const loop = () => { if (running) { const w = track.scrollWidth; pos -= speed; if (pos <= -w) pos += w; track.style.transform = `translateX(${pos}px)`; } requestAnimationFrame(loop); };
+    const segment = track.scrollWidth / 2;
+    const loop = () => { if (running) { pos -= speed; if (pos <= -segment) pos += segment; track.style.transform = `translateX(${pos}px)`; } requestAnimationFrame(loop); };
     loop();
     let dragging = false, startX = 0, startPos = 0;
-    const endDrag = ()=>{ dragging = false; container.classList.remove('dragging'); running = true; };
-    container.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dragging = true; running = false; container.classList.add('dragging'); startX = e.clientX; startPos = pos; container.setPointerCapture && container.setPointerCapture(e.pointerId); });
-    container.addEventListener('pointermove', (e)=>{ if(!dragging) return; const dx = e.clientX - startX; pos = startPos + dx; track.style.transform = `translateX(${pos}px)`; });
+    let lastX = 0, lastT = 0, vx = 0;
+    const resumeDelayMs = 2000;
+    let resumeTimer = null;
+    const scheduleResume = () => { clearTimeout(resumeTimer); resumeTimer = setTimeout(()=>{ running = true; }, resumeDelayMs); };
+    const wrap = () => { if (pos <= -segment) pos += segment; if (pos >= 0) pos -= segment; };
+    const momentum = () => {
+      let v = vx * 16;
+      const step = (t) => {
+        v *= 0.94;
+        pos += v;
+        wrap();
+        track.style.transform = `translateX(${pos}px)`;
+        if (Math.abs(v) > 0.2) { requestAnimationFrame(step); }
+        else { scheduleResume(); }
+      };
+      requestAnimationFrame(step);
+    };
+    const endDrag = ()=>{ dragging = false; container.classList.remove('dragging'); momentum(); };
+    container.addEventListener('pointerdown', (e)=>{ e.preventDefault(); dragging = true; running = false; clearTimeout(resumeTimer); container.classList.add('dragging'); startX = e.clientX; startPos = pos; lastX = e.clientX; lastT = performance.now(); vx = 0; container.setPointerCapture && container.setPointerCapture(e.pointerId); }, { passive: false });
+    container.addEventListener('pointermove', (e)=>{ if(!dragging) return; e.preventDefault(); const now = performance.now(); const dx = e.clientX - startX; pos = startPos + dx; const dv = e.clientX - lastX; const dt = Math.max(1, now - lastT); vx = vx * 0.8 + (dv / dt) * 0.2; lastX = e.clientX; lastT = now; track.style.transform = `translateX(${pos}px)`; }, { passive: false });
     container.addEventListener('pointerup', endDrag);
     container.addEventListener('pointercancel', endDrag);
-    container.addEventListener('pointerleave', endDrag);
-    container.addEventListener('wheel', (e)=>{ e.preventDefault(); running = false; pos -= (e.deltaY || 0) + (e.deltaX || 0); track.style.transform = `translateX(${pos}px)`; clearTimeout(container._wt); container._wt = setTimeout(()=>{ running = true; }, 250); }, { passive: false });
+    container.addEventListener('wheel', (e)=>{ e.preventDefault(); running = false; clearTimeout(resumeTimer); pos -= (e.deltaY || 0) + (e.deltaX || 0); wrap(); track.style.transform = `translateX(${pos}px)`; scheduleResume(); }, { passive: false });
   });
 })();
 </script>
