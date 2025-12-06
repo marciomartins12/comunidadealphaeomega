@@ -63,5 +63,6 @@ router.get('/admin/doacoes', admin.requireAdmin, admin.viewDoacoes);
 router.get('/admin/admins/new', admin.requireAdmin, admin.adminCreatePage);
 router.post('/admin/admins/new', admin.requireAdmin, admin.adminCreatePost);
 router.get('/admin/pedidos/refresh', admin.requireAdmin, admin.refreshOrdersStatus);
+router.get('/admin/pedidos/approve/:id', admin.requireAdmin, admin.approveOrderManual);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus } = require('../mysql');
+const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus, getOrder } = require('../mysql');
 const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
 
@@ -131,6 +131,20 @@ exports.refreshOrdersStatus = async (req, res) => {
       } catch {}
     }
     res.json({ ok: true, checked, updated, approved });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+};
+
+exports.approveOrderManual = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!id || isNaN(id)) return res.status(400).json({ ok: false, error: 'invalid_order_id' });
+    const order = await getOrder(id);
+    if (!order) return res.status(404).json({ ok: false, error: 'order_not_found' });
+    await updateOrderPaymentStatus(id, 'approved');
+    await clearCartForUser(order.user_id);
+    res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }

@@ -4,6 +4,12 @@
     <div class="shop-topbar">
       <button type="button" class="btn" id="refreshOrdersBtn">Atualizar status dos pedidos</button>
       <span id="refreshMsg"></span>
+      <div class="form-field" style="margin-left:12px;display:inline-block;vertical-align:middle;">
+        <span>Confirmar manualmente (ID do pedido)</span>
+        <input type="number" id="approveOrderId" class="insc-input" style="width:140px;" placeholder="ex.: 123"/>
+        <button type="button" class="btn" id="approveOrderBtn">Confirmar pagamento</button>
+        <span id="approveMsg"></span>
+      </div>
     </div>
     <div class="feature-list">
       <a class="feature-item" href="/admin/inscricoes">
@@ -30,7 +36,11 @@
 (function(){
   const btn = document.getElementById('refreshOrdersBtn');
   const msg = document.getElementById('refreshMsg');
+  const approveBtn = document.getElementById('approveOrderBtn');
+  const approveId = document.getElementById('approveOrderId');
+  const approveMsg = document.getElementById('approveMsg');
   function setMsg(t){ if(msg) { msg.textContent = t; } }
+  function setApproveMsg(t){ if(approveMsg){ approveMsg.textContent = t; } }
   if (btn) {
     btn.addEventListener('click', async () => {
       try {
@@ -40,6 +50,19 @@
         if (!data.ok) { setMsg('Falha ao atualizar'); return; }
         setMsg(`Verificados: ${data.checked}, atualizados: ${data.updated}, aprovados: ${data.approved}`);
       } catch { setMsg('Erro de rede'); }
+    });
+  }
+  if (approveBtn && approveId) {
+    approveBtn.addEventListener('click', async () => {
+      const id = Number(approveId.value || 0);
+      if (!id) { setApproveMsg('Informe o ID'); return; }
+      try {
+        setApproveMsg('Confirmando...');
+        const r = await fetch(`/admin/pedidos/approve/${id}`);
+        const data = await r.json();
+        if (!data.ok) { setApproveMsg('Falha ao confirmar'); return; }
+        setApproveMsg('Confirmado');
+      } catch { setApproveMsg('Erro de rede'); }
     });
   }
 })();
