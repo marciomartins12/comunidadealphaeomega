@@ -393,6 +393,7 @@ body.modal-open { overflow: hidden; }
 /* Página do carrinho: ocultar footer e reservar espaço para barra fixa */
 .cart-page .site-footer { display: none; }
 .cart-page .content { padding-bottom: 84px; }
+.auth-page .site-footer { display: none; }
 
 /* Barra fixa de total e pagar no carrinho */
 .cart-fixedbar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--black); box-shadow: 0 -2px 12px rgba(0,0,0,0.08); z-index: 2000; }
@@ -426,6 +427,7 @@ body.modal-open { overflow: hidden; }
 .cart-fab-label { display: none; }
 
 .auth { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); padding: 40px 0; margin: 0; }
+.auth-page { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); min-height: 100vh; }
 .auth-inner { display: grid; place-items: center; text-align: center; }
 .auth-card { width: 100%; max-width: 500px; background: #fff; color: var(--black); border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); padding: 24px; display: grid; gap: 18px; }
 .auth-brand { display: grid; gap: 8px; justify-items: center; }
