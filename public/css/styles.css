@@ -20,6 +20,8 @@ body {
   background: var(--bg);
 }
 
+body.modal-open { overflow: hidden; }
+
 .container {
   width: 100%;
   max-width: 1120px;
@@ -336,12 +338,18 @@ body {
 
 /* Modal histórico */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); }
-.modal { position: fixed; inset: 0; display: grid; place-items: center; }
-.modal-inner { width: calc(100% - 32px); max-width: 640px; background: #fff; border: 1px solid var(--black); border-radius: 8px; box-shadow: 0 12px 28px rgba(0,0,0,0.2); }
+.modal-backdrop { z-index: 3000; }
+.modal { position: fixed; inset: 0; display: grid; place-items: center; z-index: 3001; }
+.modal-inner { width: calc(100% - 32px); max-width: 640px; background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: var(--black); border: 1px solid var(--black); border-radius: 8px; box-shadow: 0 12px 28px rgba(0,0,0,0.2); }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.12); }
 .modal-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 20px; margin: 0; }
 .modal-close { width: 28px; height: 28px; border-radius: 999px; border: 1px solid var(--black); background: var(--yellow); color: var(--black); font-weight: 900; }
 .modal-content { padding: 12px 16px; display: grid; gap: 12px; }
+
+.about-card { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); border-radius: 8px; padding: 20px; display: grid; gap: 12px; justify-items: center; color: var(--black); }
+.about-logo { display: grid; place-items: center; }
+.about-logo-img { width: 120px; height: 120px; border-radius: 50%; object-fit: contain; background: transparent; border: none; box-shadow: none; }
+.about-text { max-width: 520px; font-size: 14px; line-height: 1.6; text-align: justify; }
 .hist-item { display: grid; gap: 6px; padding: 8px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; }
 .hist-row { display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
 .hist-items { font-size: 13px; display: grid; gap: 6px; }
