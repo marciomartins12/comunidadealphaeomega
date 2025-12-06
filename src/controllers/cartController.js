@@ -37,7 +37,7 @@ exports.add = async (req, res) => {
     if (!p) return res.status(400).json({ ok: false, error: 'invalid_product' });
     const q = Math.max(1, Math.min(parseInt(qty || '1', 10), 99));
     const s = String(size || '').toUpperCase();
-    if (!['PP', 'P', 'M', 'G', 'XG'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
+    if (!['PP', 'P', 'M', 'G', 'GG', 'XG'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
     await addCartItem({ user_id: u.id, product_id: p.id, name: p.name, size: s, qty: q, price: p.price });
     res.json({ ok: true, redirect: '/carrinho' });
   } catch (e) {
@@ -57,6 +57,7 @@ exports.view = async (req, res) => {
     selP: it.size === 'P',
     selM: it.size === 'M',
     selG: it.size === 'G',
+    selGG: it.size === 'GG',
     selXG: it.size === 'XG',
     priceBRL: fmt.format(Number(products[it.product_id]?.price ?? it.price)),
     lineBRL: fmt.format(Number(products[it.product_id]?.price ?? it.price) * Number(it.qty))
@@ -71,7 +72,7 @@ exports.updateItem = async (req, res) => {
   if (!u) return res.status(401).json({ ok: false, error: 'login_required' });
   const { id, size, qty } = req.body;
   const s = String(size || '').toUpperCase();
-  if (!['PP', 'P', 'M', 'G', 'XG'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
+  if (!['PP', 'P', 'M', 'G', 'GG', 'XG'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
   const q = Math.max(1, Math.min(parseInt(qty || '1', 10), 99));
   await updateCartItem({ user_id: u.id, id, size: s, qty: q });
   res.json({ ok: true });
