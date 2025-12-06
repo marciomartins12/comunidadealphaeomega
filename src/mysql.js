@@ -82,6 +82,7 @@ async function ensureSchema() {
       email VARCHAR(255) NOT NULL,
       senha_hash VARCHAR(255) NOT NULL,
       cpf VARCHAR(14) NOT NULL,
+      cidade VARCHAR(100) NOT NULL DEFAULT '',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE KEY uniq_email (email),
       UNIQUE KEY uniq_cpf_users (cpf)
@@ -89,6 +90,10 @@ async function ensureSchema() {
     const [hashCol] = await conn.query('SHOW COLUMNS FROM users LIKE "senha_hash"');
     if (!hashCol || hashCol.length === 0) {
       await conn.query('ALTER TABLE users ADD COLUMN senha_hash VARCHAR(255) NULL AFTER email');
+    }
+    const [cityCol] = await conn.query('SHOW COLUMNS FROM users LIKE "cidade"');
+    if (!cityCol || cityCol.length === 0) {
+      await conn.query("ALTER TABLE users ADD COLUMN cidade VARCHAR(100) NOT NULL DEFAULT '' AFTER cpf");
     }
     await conn.query(`CREATE TABLE IF NOT EXISTS cart_items (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -230,10 +235,10 @@ exports.updatePaymentData = async (id, data) => {
   }
 };
 
-exports.createUser = async ({ nome, email, senha_hash, cpf }) => {
+exports.createUser = async ({ nome, email, senha_hash, cpf, cidade }) => {
   const conn = await pool.getConnection();
   try {
-    const [r] = await conn.execute('INSERT INTO users (nome, email, senha_hash, cpf) VALUES (?,?,?,?)', [nome, email, senha_hash, cpf]);
+    const [r] = await conn.execute('INSERT INTO users (nome, email, senha_hash, cpf, cidade) VALUES (?,?,?,?,?)', [nome, email, senha_hash, cpf, cidade]);
     return r.insertId;
   } finally { conn.release(); }
 };
