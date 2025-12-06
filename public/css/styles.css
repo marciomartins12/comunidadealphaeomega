@@ -403,3 +403,18 @@ body {
 .coord-name { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 16px; color: var(--black); }
 .coord-role { font-size: 13px; color: var(--black); }
 .bio-body { display: grid; gap: 8px; }
+
+.agenda { background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); padding: 40px 0 60px; margin: 0; }
+.agenda-inner { display: grid; gap: 16px; justify-items: center; text-align: center; }
+.agenda-top { width: 100%; max-width: 720px; display: flex; justify-content: flex-start; }
+.agenda-head { display: grid; justify-items: center; }
+.agenda-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px; margin: 0; color: var(--black); }
+.agenda-list { width: 100%; max-width: 720px; display: grid; gap: 14px; }
+.agenda-item { display: grid; gap: 6px; background: #fff; border: 1px solid var(--black); border-radius: 16px; padding: 12px 14px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+.agenda-date { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 18px; color: var(--black); }
+.agenda-desc { font-size: 14px; font-weight: 700; color: var(--highlight-end); }
+
+@media (min-width: 768px) {
+  .agenda-title { font-size: 34px; }
+  .agenda-date { font-size: 20px; }
+}

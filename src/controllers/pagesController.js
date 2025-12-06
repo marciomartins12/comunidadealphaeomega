@@ -213,7 +213,7 @@ exports.documentario = (req, res) => {
 };
 
 exports.agenda = (req, res) => {
-  res.send('Agenda RC em construção.');
+  res.render('agenda', { pageTitle: 'Agenda RC' });
 };
 exports.inscricaoStatus = async (req, res) => {
   try {
