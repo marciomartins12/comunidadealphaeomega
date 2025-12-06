@@ -1,4 +1,4 @@
-const { getAdminByEmail, createAdmin, listPaidInscricoes, listOrders, listDonations } = require('../mysql');
+const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations } = require('../mysql');
 const bcrypt = require('bcryptjs');
 
 exports.loginPage = (req, res) => {
@@ -30,7 +30,7 @@ exports.requireAdmin = (req, res, next) => {
 };
 
 exports.dashboard = async (req, res) => {
-  const [insc, orders, donations] = await Promise.all([listPaidInscricoes(), listOrders(), listDonations()]);
+  const [insc, orders, donations] = await Promise.all([listPaidInscricoes(), listPaidOrdersDetailed(), listPaidDonations()]);
   res.render('admin/dashboard', {
     pageTitle: 'Dashboard do Administrador',
     inscCount: insc.length,
@@ -56,13 +56,42 @@ exports.viewInscricoes = async (req, res) => {
 };
 
 exports.viewPedidos = async (req, res) => {
-  const rows = await listOrders();
-  res.render('admin/pedidos', { pageTitle: 'Gerenciar pedidos', rows });
+  const rows = await listPaidOrdersDetailed();
+  const fmt = (d) => {
+    if (!d) return '';
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  };
+  const out = rows.map(r => {
+    const dt = r.paid_at ? new Date(r.paid_at) : null;
+    return { ...r, paid_at_br: dt ? fmt(dt) : '' };
+  });
+  res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length });
 };
 
 exports.viewDoacoes = async (req, res) => {
   const rows = await listDonations();
-  res.render('admin/doacoes', { pageTitle: 'Gerenciar doações', rows });
+  const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const fmt = (d) => {
+    if (!d) return '';
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  };
+  const out = rows.map(r => {
+    const paid = r.paid_at ? new Date(r.paid_at) : null;
+    const created = r.created_at ? new Date(r.created_at) : null;
+    return {
+      ...r,
+      amount_br: money.format(Number(r.amount || 0)),
+      paid_at_br: paid ? fmt(paid) : '',
+      created_at_br: created ? fmt(created) : ''
+    };
+  });
+  res.render('admin/doacoes', { pageTitle: 'Doações', rows: out, count: out.length });
 };
 
 exports.adminCreatePage = (req, res) => {

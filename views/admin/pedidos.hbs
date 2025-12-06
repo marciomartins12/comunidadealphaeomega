@@ -1,22 +1,30 @@
 <section class="shop">
   <div class="container shop-inner">
-    <h2 class="shop-title">Gerenciar pedidos</h2>
+    <h2 class="shop-title">Pedidos pagos</h2>
+    <div class="shop-topbar">
+      <a href="/admin" class="shop-back">Voltar para dashboard</a>
+    </div>
+    {{#if count}}
     <div class="form-card">
       <div class="form-grid">
-        <div class="form-field form-col">
-          <table>
+        <div class="form-field form-col table-wrap">
+          <table class="data-table">
             <thead>
-              <tr><th>ID</th><th>User</th><th>Total</th><th>Status</th><th>Pago em</th><th>Criado em</th></tr>
+              <tr><th>Nome</th><th>Cidade</th><th>CPF</th><th>Produtos</th><th>Total</th><th>Pago em</th></tr>
             </thead>
             <tbody>
               {{#each rows}}
               <tr>
-                <td>{{this.id}}</td>
-                <td>{{this.user_id}}</td>
-                <td>{{this.total}}</td>
-                <td>{{this.mp_status}}</td>
-                <td>{{this.paid_at}}</td>
-                <td>{{this.created_at}}</td>
+                <td>{{this.buyer.nome}}</td>
+                <td>{{this.buyer.cidade}}</td>
+                <td>{{this.buyer.cpf}}</td>
+                <td>
+                  {{#each this.items}}
+                    <div>{{this.name}} ({{this.size}}) × {{this.qty}} — R${{this.price}}</div>
+                  {{/each}}
+                </td>
+                <td>R${{this.total}}</td>
+                <td>{{this.paid_at_br}}</td>
               </tr>
               {{/each}}
             </tbody>
@@ -24,5 +32,8 @@
         </div>
       </div>
     </div>
+    {{else}}
+      <p class="insc-error">Nenhum pedido pago encontrado.</p>
+    {{/if}}
   </div>
 </section>

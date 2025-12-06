@@ -1,23 +1,26 @@
 <section class="shop">
   <div class="container shop-inner">
-    <h2 class="shop-title">Gerenciar doações</h2>
+    <h2 class="shop-title">Doações</h2>
+    <div class="shop-topbar">
+      <a href="/admin" class="shop-back">Voltar para dashboard</a>
+    </div>
+    {{#if count}}
     <div class="form-card">
       <div class="form-grid">
-        <div class="form-field form-col">
-          <table>
+        <div class="form-field form-col table-wrap">
+          <table class="data-table">
             <thead>
-              <tr><th>ID</th><th>Nome</th><th>Contato</th><th>Valor</th><th>Status</th><th>Pago em</th><th>Criado em</th></tr>
+              <tr><th>Nome</th><th>Contato</th><th>Valor</th><th>Status</th><th>Pago em</th><th>Criado em</th></tr>
             </thead>
             <tbody>
               {{#each rows}}
               <tr>
-                <td>{{this.id}}</td>
                 <td>{{this.nome}}</td>
                 <td>{{this.contato}}</td>
-                <td>{{this.amount}}</td>
+                <td>{{this.amount_br}}</td>
                 <td>{{this.mp_status}}</td>
-                <td>{{this.paid_at}}</td>
-                <td>{{this.created_at}}</td>
+                <td>{{this.paid_at_br}}</td>
+                <td>{{this.created_at_br}}</td>
               </tr>
               {{/each}}
             </tbody>
@@ -25,5 +28,8 @@
         </div>
       </div>
     </div>
+    {{else}}
+      <p class="insc-error">Nenhuma doação encontrada.</p>
+    {{/if}}
   </div>
 </section>

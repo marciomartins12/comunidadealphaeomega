@@ -532,3 +532,41 @@ exports.listDonations = async () => {
     return rows;
   } finally { conn.release(); }
 };
+
+exports.listPaidDonations = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT id, nome, contato, amount, mp_status, paid_at, created_at FROM donations WHERE mp_status = ? ORDER BY paid_at DESC', ['approved']);
+    return rows;
+  } finally { conn.release(); }
+};
+
+exports.listPaidOrdersDetailed = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [orders] = await conn.execute(
+      'SELECT o.id, o.user_id, o.total, o.paid_at, u.nome, u.cidade, u.cpf FROM orders o JOIN users u ON o.user_id = u.id WHERE o.mp_status = ? ORDER BY o.paid_at DESC',
+      ['approved']
+    );
+    const ids = orders.map(o => o.id);
+    let itemsMap = {};
+    if (ids.length) {
+      const placeholders = ids.map(() => '?').join(',');
+      const [items] = await conn.execute(
+        `SELECT order_id, product_id, name, size, qty, price FROM order_items WHERE order_id IN (${placeholders}) ORDER BY id ASC`,
+        ids
+      );
+      for (const it of items) {
+        if (!itemsMap[it.order_id]) itemsMap[it.order_id] = [];
+        itemsMap[it.order_id].push({ product_id: it.product_id, name: it.name, size: it.size, qty: it.qty, price: it.price });
+      }
+    }
+    return orders.map(o => ({
+      id: o.id,
+      total: o.total,
+      paid_at: o.paid_at,
+      buyer: { nome: o.nome, cidade: o.cidade, cpf: o.cpf },
+      items: itemsMap[o.id] || []
+    }));
+  } finally { conn.release(); }
+};
