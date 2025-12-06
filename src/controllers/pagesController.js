@@ -18,7 +18,7 @@ exports.inscricao = (req, res) => {
 const { saveInscricao, getInscricao, getByCpf, updatePaymentStatus, updatePaymentData, getInscricaoByPaymentId, getOrderByPaymentId, updateOrderPaymentStatus, clearCartForUser } = require('../mysql');
 const { createDonation, getDonation, updateDonationPaymentStatus, updateDonationPaymentData, getDonationByPaymentId } = require('../mysql');
 const { createPixPayment, getPaymentStatus } = require('../services/payment');
-const AMOUNT = Number(process.env.INSCRICAO_AMOUNT || 0.20);
+const AMOUNT = Number(process.env.INSCRICAO_AMOUNT || 101);
 
 const validaCPF = (cpf) => {
   const c = (cpf || '').replace(/\D/g, '');
