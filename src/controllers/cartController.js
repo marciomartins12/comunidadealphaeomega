@@ -185,7 +185,7 @@ exports.historico = async (req, res) => {
         id: o.id,
         total: money.format(Number(o.total)),
         paid_at: o.paid_at ? fmt.format(new Date(o.paid_at)) : null,
-        items: items.map(it => ({ product_id: it.product_id, name: it.name, size: it.size, qty: it.qty, price: money.format(Number(it.price)) }))
+        items: items.map(it => ({ product_id: it.product_id, name: it.name, size: it.size, qty: it.qty, price: money.format(Number(it.price)), image: products[it.product_id]?.image || '' }))
       });
     }
   }

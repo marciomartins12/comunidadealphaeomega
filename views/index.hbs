@@ -76,7 +76,7 @@
         <p class="feature-desc">Clique e acesse fotos e vídeos exclusivos!</p>
       </a>
 
-      <a class="feature-item" href="/documentario" aria-label="Documentário RC">
+      <a class="feature-item" href="https://www.youtube.com/watch?v=xqEzs9g7zIE" aria-label="Documentário RC">
         <h3 class="feature-title">Documentário RC</h3>
         <p class="feature-desc">Clique e acesse o nosso primeiro documentário no YouTube</p>
       </a>
@@ -103,6 +103,43 @@
     </div>
   </div>
 </section>
+
+<div class="modal-backdrop" id="bioOverlay" hidden></div>
+<div class="modal" id="bioModal" hidden>
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h3 class="modal-title">Diretor Espiritual</h3>
+      <button type="button" class="modal-close" id="bioClose">×</button>
+    </div>
+    <div class="modal-content">
+      <div class="bio-layout">
+        <div class="bio-images">
+          <img class="bio-img" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
+          <img class="bio-img" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
+          <img class="bio-img" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
+        </div>
+        <div class="bio-content">
+          <h4 class="bio-title">Padre Dicinho</h4>
+          <p class="bio-text">nasceu no dia 10 de maio de 1996, na cidade de Pinheiro. Ingressou no seminário em 30 de janeiro de 2012, recebeu a ordenação diaconal em 8 de julho de 2023 e a ordenação presbiteral em 30 de dezembro de 2023. Atuou durante cinco anos como assessor da Pastoral da Juventude, foi articulador da Pastoral Estudantil no Colégio Pinheirense e professor da mesma instituição durante o ano de 2023. Também exerceu o ministério de vigário paroquial na Paróquia São Francisco Xavier, em Turiaçu. Atualmente, é pároco da Paróquia Santa Luzia, em Turilândia, e foi nomeado diretor espiritual do Retiro Alfa e Ômega em 2023, função que continua exercendo com excelência, ao lado da coordenação do projeto.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<script>
+(function(){
+  const card = document.querySelector('.team-diretor');
+  const overlay = document.getElementById('bioOverlay');
+  const modal = document.getElementById('bioModal');
+  const closeBtn = document.getElementById('bioClose');
+  const open = () => { if (overlay) overlay.hidden = false; if (modal) modal.hidden = false; };
+  const close = () => { if (overlay) overlay.hidden = true; if (modal) modal.hidden = true; };
+  if (card) card.addEventListener('click', (e) => { e.preventDefault(); open(); });
+  if (overlay) overlay.addEventListener('click', close);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+})();
+</script>
 
 <section class="sponsors">
   <div class="container sponsors-inner">

@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
     nav.classList.toggle('open', !open);
   };
 
-  button.addEventListener('click', toggle);
-});
+  const close = () => {
+    button.setAttribute('aria-expanded', 'false');
+    nav.classList.remove('open');
+  };
 
+  button.addEventListener('click', toggle);
+  window.addEventListener('scroll', close, { passive: true });
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+});

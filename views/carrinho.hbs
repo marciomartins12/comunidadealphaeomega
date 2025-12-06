@@ -2,7 +2,7 @@
   <div class="container shop-inner">
     <div class="shop-hero">
       <div class="shop-hero-top">
-        <p class="shop-hero-title">Carrinho</p>
+        <p class="shop-hero-title cart-highlight">Carrinho</p>
         <div class="shop-oval"><img class="shop-oval-img" src="/public/img/loja/logoSTORE.png" alt="RC Store"/></div>
       </div>
     </div>
@@ -107,8 +107,13 @@
         data.orders.forEach(o => {
           const div = document.createElement('div');
           div.className = 'hist-item';
-          const its = o.items.map(i => `${i.name} (${i.size}) × ${i.qty} — ${i.price}`).join('<br/>');
-          div.innerHTML = `<div class="hist-row"><strong>Pedido #${o.id}</strong><span>${o.paid_at || ''}</span></div><div class="hist-items">${its}</div><div class="hist-total">Total: ${o.total}</div>`;
+          const lines = o.items.map(i => `
+            <div class=\"hist-item-line\">
+              ${i.image ? `<img class=\"hist-item-img\" src=\"${i.image}\" alt=\"${i.name}\"/>` : ''}
+              <div class=\"hist-item-text\">${i.name} (${i.size}) × ${i.qty} — ${i.price}</div>
+            </div>
+          `).join('');
+          div.innerHTML = `<div class=\"hist-row\"><strong>Pedido #${o.id}</strong><span>${o.paid_at || ''}</span></div><div class=\"hist-items\">${lines}</div><div class=\"hist-total\">Total: ${o.total}</div>`;
           if (list) list.appendChild(div);
         });
       } else {
