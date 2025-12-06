@@ -127,6 +127,19 @@ async function ensureSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    await conn.query(`CREATE TABLE IF NOT EXISTS donations (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      nome VARCHAR(255) NOT NULL,
+      contato VARCHAR(50) NOT NULL,
+      amount DECIMAL(10,2) NOT NULL,
+      mp_payment_id VARCHAR(64),
+      mp_qr_code TEXT,
+      mp_qr_base64 MEDIUMTEXT,
+      mp_ticket_url TEXT,
+      mp_status VARCHAR(50),
+      paid_at TIMESTAMP NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
   } finally { conn.release(); }
 }
 
@@ -383,4 +396,54 @@ exports.ping = async () => {
   const conn = await pool.getConnection();
   try { await conn.query('SELECT 1'); return true; }
   finally { conn.release(); }
+};
+
+exports.createDonation = async ({ nome, contato, amount, payment }) => {
+  const conn = await pool.getConnection();
+  try {
+    const [r] = await conn.execute(
+      'INSERT INTO donations (nome, contato, amount, mp_payment_id, mp_qr_code, mp_qr_base64, mp_ticket_url, mp_status) VALUES (?,?,?,?,?,?,?,?)',
+      [nome, contato, amount, payment.payment_id || null, payment.qr_code || null, payment.qr_base64 || null, payment.ticket_url || null, 'pending']
+    );
+    return r.insertId;
+  } finally { conn.release(); }
+};
+
+exports.getDonation = async (id) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT * FROM donations WHERE id = ?', [id]);
+    return rows[0] || null;
+  } finally { conn.release(); }
+};
+
+exports.updateDonationPaymentStatus = async (id, status) => {
+  const conn = await pool.getConnection();
+  try {
+    const paidAt = status === 'approved' ? new Date() : null;
+    await conn.execute('UPDATE donations SET mp_status = ?, paid_at = ? WHERE id = ?', [status, paidAt, id]);
+  } finally { conn.release(); }
+};
+
+exports.updateDonationPaymentData = async (id, data) => {
+  const conn = await pool.getConnection();
+  try {
+    const sql = 'UPDATE donations SET mp_payment_id = ?, mp_qr_code = ?, mp_qr_base64 = ?, mp_ticket_url = ?, mp_status = ?, paid_at = NULL WHERE id = ?';
+    await conn.execute(sql, [
+      data.mp_payment_id,
+      data.mp_qr_code,
+      data.mp_qr_base64,
+      data.mp_ticket_url,
+      data.mp_status || 'pending',
+      id
+    ]);
+  } finally { conn.release(); }
+};
+
+exports.getDonationByPaymentId = async (mp_payment_id) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT * FROM donations WHERE mp_payment_id = ? LIMIT 1', [mp_payment_id]);
+    return rows[0] || null;
+  } finally { conn.release(); }
 };

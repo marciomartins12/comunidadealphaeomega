@@ -21,7 +21,7 @@ exports.createPixPayment = async ({ amount, description, nome, cpf }) => {
     payer: {
       email: process.env.MP_PAYER_EMAIL_DEFAULT || 'inscricao@retiro.local',
       first_name: nome,
-      identification: { type: 'CPF', number: String(cpf || '').replace(/\D/g, '') }
+      ...(String(cpf || '').replace(/\D/g, '').length === 11 ? { identification: { type: 'CPF', number: String(cpf || '').replace(/\D/g, '') } } : {})
     }
   };
 

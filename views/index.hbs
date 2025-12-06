@@ -94,10 +94,10 @@
     <div class="team-grid">
       <div class="team-item">
         <a class="team-card team-diretor" href="#" aria-label="Diretor Espiritual"></a>
-        <span class="team-label">Diretor Espiritual</span>
+        <span class="team-label" id="teamDiretorLabel">Diretor Espiritual</span>
       </div>
       <div class="team-item">
-        <a class="team-card team-coordenacao" href="#" aria-label="Coordenação Geral"></a>
+        <a class="team-card team-coordenacao" href="/coordenacao" aria-label="Coordenação Geral"></a>
         <span class="team-label">Coordenação Geral</span>
       </div>
     </div>
@@ -112,13 +112,11 @@
       <button type="button" class="modal-close" id="bioClose">×</button>
     </div>
     <div class="modal-content">
-      <div class="bio-layout">
-        <div class="bio-images">
-          <img class="bio-img" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
-          <img class="bio-img" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
-          <img class="bio-img" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
+      <div class="bio-card">
+        <div class="bio-media">
+          <img class="bio-photo" src="/public/img/diretorEspiritual.png" alt="Diretor Espiritual"/>
         </div>
-        <div class="bio-content">
+        <div class="bio-body">
           <h4 class="bio-title">Padre Dicinho</h4>
           <p class="bio-text">nasceu no dia 10 de maio de 1996, na cidade de Pinheiro. Ingressou no seminário em 30 de janeiro de 2012, recebeu a ordenação diaconal em 8 de julho de 2023 e a ordenação presbiteral em 30 de dezembro de 2023. Atuou durante cinco anos como assessor da Pastoral da Juventude, foi articulador da Pastoral Estudantil no Colégio Pinheirense e professor da mesma instituição durante o ano de 2023. Também exerceu o ministério de vigário paroquial na Paróquia São Francisco Xavier, em Turiaçu. Atualmente, é pároco da Paróquia Santa Luzia, em Turilândia, e foi nomeado diretor espiritual do Retiro Alfa e Ômega em 2023, função que continua exercendo com excelência, ao lado da coordenação do projeto.</p>
         </div>
@@ -130,12 +128,15 @@
 <script>
 (function(){
   const card = document.querySelector('.team-diretor');
+  const label = document.getElementById('teamDiretorLabel');
   const overlay = document.getElementById('bioOverlay');
   const modal = document.getElementById('bioModal');
   const closeBtn = document.getElementById('bioClose');
   const open = () => { if (overlay) overlay.hidden = false; if (modal) modal.hidden = false; };
   const close = () => { if (overlay) overlay.hidden = true; if (modal) modal.hidden = true; };
-  if (card) card.addEventListener('click', (e) => { e.preventDefault(); open(); });
+  const openHandler = (e) => { e.preventDefault(); open(); };
+  if (card) card.addEventListener('click', openHandler);
+  if (label) label.addEventListener('click', openHandler);
   if (overlay) overlay.addEventListener('click', close);
   if (closeBtn) closeBtn.addEventListener('click', close);
 })();
@@ -145,7 +146,7 @@
   <div class="container sponsors-inner">
     <div class="sponsors-donate">
       <h2 class="donate-title">Faça sua doação</h2>
-      <a href="mailto:alfaeomegarc@gmail.com" class="btn" aria-label="Enviar e-mail para doação">Fazer Doação</a>
+      <a href="/doacao" class="btn" aria-label="Abrir formulário de doação">Fazer Doação</a>
     </div>
     <div class="sponsors-head">
       <h2 class="sponsors-title">APOIADORES*</h2>

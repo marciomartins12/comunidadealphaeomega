@@ -1,0 +1,18 @@
+<section class="inscricao">
+  <div class="container inscricao-inner">
+    <h2 class="insc-title">Faça sua doação</h2>
+    {{#if error}}<p class="insc-error">{{error}}</p>{{/if}}
+    <div class="form-wrapper">
+      <div class="form-card">
+        <form method="post" action="/doacao">
+          <div class="form-grid">
+            <div class="form-field"><span>Seu nome</span><input type="text" name="nome" required></div>
+            <div class="form-field"><span>Contato (WhatsApp)</span><input type="text" name="contato" required></div>
+            <div class="form-field form-col"><span>Valor da doação (R$)</span><input type="number" name="valor" step="0.01" min="1" required></div>
+          </div>
+          <div class="form-actions"><button class="btn" type="submit">Gerar PIX</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

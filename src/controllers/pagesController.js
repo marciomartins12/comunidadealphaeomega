@@ -16,6 +16,7 @@ exports.inscricao = (req, res) => {
 };
 
 const { saveInscricao, getInscricao, getByCpf, updatePaymentStatus, updatePaymentData, getInscricaoByPaymentId, getOrderByPaymentId, updateOrderPaymentStatus, clearCartForUser } = require('../mysql');
+const { createDonation, getDonation, updateDonationPaymentStatus, updateDonationPaymentData, getDonationByPaymentId } = require('../mysql');
 const { createPixPayment, getPaymentStatus } = require('../services/payment');
 const AMOUNT = Number(process.env.INSCRICAO_AMOUNT || 0.20);
 
@@ -171,6 +172,11 @@ exports.mercadoPagoWebhook = async (req, res) => {
       await updatePaymentStatus(inscr.id, status);
       return res.status(200).json({ ok: true });
     }
+    const donation = await getDonationByPaymentId(String(paymentId));
+    if (donation) {
+      await updateDonationPaymentStatus(donation.id, status);
+      return res.status(200).json({ ok: true });
+    }
     const order = await getOrderByPaymentId(String(paymentId));
     if (order) {
       const wasApproved = order.mp_status === 'approved';
@@ -191,6 +197,7 @@ exports.loja = (req, res) => {
     pageTitle: 'Loja'
   });
 };
+
 
 exports.revista = (req, res) => {
   const { slug } = req.params;
@@ -217,6 +224,88 @@ exports.inscricaoStatus = async (req, res) => {
     const status = inscr.mp_status || 'pending';
     const paid = (status === 'approved') || !!inscr.paid_at;
     return res.json({ ok: true, exists: true, paid, status, inscricaoId: inscr.id, paymentUrl: `/pagamento/${inscr.id}` });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+};
+
+exports.coordenacao = (req, res) => {
+  res.render('coordenacao', {
+    pageTitle: 'Coordenação Geral'
+  });
+};
+
+exports.doacaoPage = (req, res) => {
+  res.render('doacao', { pageTitle: 'Faça sua doação' });
+};
+
+exports.doacaoPost = async (req, res) => {
+  try {
+    const nome = String(req.body.nome || '').trim();
+    const contato = String(req.body.contato || '').trim();
+    const amount = Number(req.body.valor || 0);
+    if (!nome || !contato || !(amount > 0)) {
+      return res.status(400).render('doacao', { pageTitle: 'Faça sua doação', error: 'Preencha nome, contato e valor válido' });
+    }
+    const payment = await createPixPayment({ amount, description: 'Doação Alfa&Ômega', nome });
+    const id = await createDonation({ nome, contato, amount, payment });
+    res.redirect(`/doacao/pagamento/${id}`);
+  } catch (e) {
+    res.status(500).render('doacao', { pageTitle: 'Faça sua doação', error: 'Erro ao iniciar doação' });
+  }
+};
+
+exports.doacaoPagamento = async (req, res) => {
+  const { id } = req.params;
+  const data = await getDonation(id);
+  if (!data) return res.status(404).send('Doação não encontrada');
+  const valorBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(data.amount || 0));
+  res.render('pagamento', {
+    pageTitle: 'Pagamento da Doação',
+    qr_code_base64: data.mp_qr_base64,
+    qr_code: data.mp_qr_code,
+    ticket_url: data.mp_ticket_url,
+    status: data.mp_status || 'pending',
+    valor: valorBRL,
+    inscricaoId: id,
+    statusPath: `/doacao/status/${id}`
+  });
+};
+
+exports.doacaoPagamentoStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = await getDonation(id);
+    if (!data) return res.status(404).json({ ok: false, error: 'Doação não encontrada' });
+    let status = data.mp_status || 'pending';
+    let recreated = false;
+    if (data.mp_payment_id) {
+      try {
+        const info = await getPaymentStatus(data.mp_payment_id);
+        status = info.status || status;
+        const expStr = info.date_of_expiration;
+        let expired = false;
+        if (status === 'expired') expired = true;
+        else if (expStr) {
+          const expDate = new Date(expStr);
+          if (!isNaN(expDate) && Date.now() > expDate.getTime()) expired = true;
+        }
+        if (expired && status !== 'approved') {
+          const newPay = await createPixPayment({ amount: Number(data.amount || 0), description: 'Doação Alfa&Ômega', nome: data.nome });
+          await updateDonationPaymentData(id, {
+            mp_payment_id: newPay.payment_id,
+            mp_qr_code: newPay.qr_code,
+            mp_qr_base64: newPay.qr_base64,
+            mp_ticket_url: newPay.ticket_url,
+            mp_status: 'pending'
+          });
+          status = 'pending';
+          recreated = true;
+        }
+      } catch {}
+    }
+    await updateDonationPaymentStatus(id, status);
+    res.json({ ok: true, status, paid: status === 'approved', recreated });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }

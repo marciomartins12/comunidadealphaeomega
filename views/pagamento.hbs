@@ -31,9 +31,10 @@
   (function(){
     const statusEl = document.getElementById('payStatus');
     const id = '{{inscricaoId}}';
+    const statusPath = '{{statusPath}}';
     async function refresh(){
       try{
-        const r = await fetch(`/pagamento/status/${id}`);
+        const r = await fetch(statusPath || `/pagamento/status/${id}`);
         const data = await r.json();
         if (!data.ok) return;
         const pt = { approved: 'Aprovado', pending: 'Pendente', in_process: 'Em análise', rejected: 'Recusado', expired: 'Expirado' };

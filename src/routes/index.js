@@ -7,6 +7,11 @@ const db = require('../mysql');
 
 router.get('/', pages.home);
 router.get('/sobre', pages.sobre);
+router.get('/coordenacao', pages.coordenacao);
+router.get('/doacao', pages.doacaoPage);
+router.post('/doacao', pages.doacaoPost);
+router.get('/doacao/pagamento/:id', pages.doacaoPagamento);
+router.get('/doacao/status/:id', pages.doacaoPagamentoStatus);
 router.get('/inscricao', pages.inscricao);
 router.post('/inscricao', (req, res, next) => {
   const up = req.app.locals.upload;
