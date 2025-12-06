@@ -6,6 +6,33 @@
     </div>
     {{#if count}}
     <div class="form-card">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-title">Recebimento líquido</div>
+          <div class="summary-value">{{netTotalBRL}}</div>
+          <div class="summary-note">Taxa do Mercado Pago: 0,99% por pedido</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-title">Tamanhos por produto</div>
+          <div class="products-list">
+            {{#each productsSummary}}
+              <div class="product-item">
+                <div class="product-head">
+                  <span class="product-name">{{this.name}}</span>
+                  <span class="product-type">{{this.type}}</span>
+                </div>
+                <div class="sizes-line">
+                  {{#each this.sizes}}
+                    {{#if @index}} • {{/if}}{{this}}
+                  {{/each}}
+                </div>
+              </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
       <div class="form-grid">
         <div class="form-field form-col table-wrap">
           <table class="data-table">

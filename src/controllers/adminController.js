@@ -58,6 +58,7 @@ exports.viewInscricoes = async (req, res) => {
 
 exports.viewPedidos = async (req, res) => {
   const rows = await listPaidOrdersDetailed();
+  const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmt = (d) => {
     if (!d) return '';
     const dd = String(d.getDate()).padStart(2, '0');
@@ -69,7 +70,28 @@ exports.viewPedidos = async (req, res) => {
     const dt = r.paid_at ? new Date(r.paid_at) : null;
     return { ...r, paid_at_br: dt ? fmt(dt) : '' };
   });
-  res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length });
+  const fee = 0.0099;
+  const netTotal = rows.reduce((acc, r) => acc + Number(r.total || 0) * (1 - fee), 0);
+  const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
+  const productMap = {};
+  for (const r of rows) {
+    for (const it of r.items || []) {
+      const pid = String(it.product_id || '');
+      if (!pid) continue;
+      if (!productMap[pid]) {
+        const isRegular = pid.endsWith('_regular');
+        const counts = {}; sizes.forEach(s => counts[s] = 0);
+        productMap[pid] = { name: it.name, type: isRegular ? 'Regular' : 'Oversized', counts };
+      }
+      const sz = sizes.includes(String(it.size)) ? String(it.size) : null;
+      if (sz) productMap[pid].counts[sz] += Number(it.qty || 0);
+    }
+  }
+  const productsSummary = Object.values(productMap).map(p => ({
+    ...p,
+    sizes: sizes.filter(s => Number(p.counts[s] || 0) > 0).map(s => `${s}: ${p.counts[s]}`)
+  }));
+  res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length, netTotalBRL: money.format(netTotal), productsSummary });
 };
 
 exports.viewDoacoes = async (req, res) => {
