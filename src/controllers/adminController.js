@@ -35,12 +35,17 @@ exports.dashboard = async (req, res) => {
   const fee = 0.0099;
   const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const netTotal = orders.reduce((acc, o) => acc + Number(o.total || 0) * (1 - fee), 0);
+  const inscAmount = Number(process.env.INSCRICAO_AMOUNT || 101);
+  const netInsc = insc.length * inscAmount * (1 - fee);
+  const netDon = donations.reduce((acc, d) => acc + Number(d.amount || 0) * (1 - fee), 0);
   res.render('admin/dashboard', {
     pageTitle: 'Dashboard do Administrador',
     inscCount: insc.length,
     ordersCount: orders.length,
     donationsCount: donations.length,
-    ordersNetBRL: money.format(netTotal)
+    ordersNetBRL: money.format(netTotal),
+    inscNetBRL: money.format(netInsc),
+    donationsNetBRL: money.format(netDon)
   });
 };
 
