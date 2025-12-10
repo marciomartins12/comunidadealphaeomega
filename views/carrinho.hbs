@@ -10,7 +10,7 @@
     <h2 class="shop-title">Itens</h2>
     {{#if items.length}}
       {{#each items}}
-        <div class="cart-item" data-id="{{id}}">
+        <div class="cart-item" data-id="{{id}}" data-size="{{size}}">
           <div class="cart-item-media">
             <img class="cart-item-img" src="{{image}}" alt="{{name}}"/>
           </div>
@@ -19,6 +19,7 @@
               <p class="cart-item-title">{{name}}</p>
             </div>
             <div class="cart-controls">
+              {{#if hasSize}}
               <div class="cart-control">
                 <label>Tamanho</label>
                 <select class="insc-input cart-select">
@@ -30,6 +31,7 @@
                   <option {{#if selXG}}selected{{/if}}>XG</option>
                 </select>
               </div>
+              {{/if}}
               <div class="cart-control">
                 <label>Quantidade</label>
                 <div class="qty">
@@ -67,7 +69,8 @@
     const del = prod.querySelector('.btn-remove');
     const send = async () => {
       try {
-        const r = await fetch('/cart/item/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, size: sizeEl.value, qty: qtyEl.value }) });
+        const size = sizeEl ? sizeEl.value : (prod.getAttribute('data-size') || 'M');
+        const r = await fetch('/cart/item/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, size, qty: qtyEl.value }) });
         if (r.status === 200) { window.location.reload(); }
       } catch {}
     };

@@ -26,6 +26,13 @@ const products = {
     price: 52.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png'
   }
+  ,
+  cordao_alfa_omega: {
+    id: 'cordao_alfa_omega',
+    name: 'Cordão Alfa&Ômega',
+    price: 12.0,
+    image: '/public/img/loja/cordao.jpeg'
+  }
 };
 
 exports.add = async (req, res) => {
@@ -53,12 +60,14 @@ exports.view = async (req, res) => {
   const mapped = items.map(it => ({
     ...it,
     image: products[it.product_id]?.image,
+    hasSize: it.product_id !== 'cordao_alfa_omega',
     selPP: it.size === 'PP',
     selP: it.size === 'P',
     selM: it.size === 'M',
     selG: it.size === 'G',
     selGG: it.size === 'GG',
     selXG: it.size === 'XG',
+    size: it.size,
     priceBRL: fmt.format(Number(products[it.product_id]?.price ?? it.price)),
     lineBRL: fmt.format(Number(products[it.product_id]?.price ?? it.price) * Number(it.qty))
   }));
