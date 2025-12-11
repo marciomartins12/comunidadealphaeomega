@@ -52,6 +52,7 @@ router.get('/agenda', pages.agenda);
 router.get('/pagamento/:id', pages.pagamento);
 router.get('/pagamento/status/:id', pages.pagamentoStatus);
 router.get('/webhook/mercadopago', express.json({ type: 'application/json' }), pages.mercadoPagoWebhook);
+router.post('/webhook/mercadopago', pages.mercadoPagoWebhook);
 
 // Admin
 router.get('/admin/login', admin.loginPage);
