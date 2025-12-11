@@ -5,32 +5,32 @@ const products = {
   quadrinho_pb_branca: {
     id: 'quadrinho_pb_branca',
     name: 'Quadrinho P&B Santos',
-    price: 0.16,
+    price: 68.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSP&BBRANCAOVERSIZED.png'
   },
   quadrinho_pb_branca_regular: {
     id: 'quadrinho_pb_branca_regular',
     name: 'Quadrinho P&B Santos (regular)',
-    price: 0.15,
+    price: 52.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSP&B-BRANCA.png'
   },
   quadrinho_color_preta: {
     id: 'quadrinho_color_preta',
     name: 'Quadrinho Color Santos',
-    price: 0.16,
+    price: 68.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSCOLOR-PRETA OVERSIZED.png'
   },
   quadrinho_color_preta_regular: {
     id: 'quadrinho_color_preta_regular',
     name: 'Quadrinho Color Santos (preta regular)',
-    price: 0.15,
+    price: 52.0,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png'
   }
   ,
   cordao_alfa_omega: {
     id: 'cordao_alfa_omega',
     name: 'Cordão Alfa&Ômega',
-    price: 0.1,
+    price: 12.0,
     image: '/public/img/loja/cordao.jpeg'
   }
 };
