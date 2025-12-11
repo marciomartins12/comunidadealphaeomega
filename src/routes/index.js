@@ -65,5 +65,7 @@ router.get('/admin/admins/new', admin.requireAdmin, admin.adminCreatePage);
 router.post('/admin/admins/new', admin.requireAdmin, admin.adminCreatePost);
 router.get('/admin/pedidos/refresh', admin.requireAdmin, admin.refreshOrdersStatus);
 router.get('/admin/pedidos/approve/:id', admin.requireAdmin, admin.approveOrderManual);
+router.post('/admin/pedidos/purge-unpaid', admin.requireAdmin, admin.purgeUnpaidOrders);
+router.get('/admin/pedidos/purge-unpaid', admin.requireAdmin, admin.purgeUnpaidOrders);
 
 module.exports = router;

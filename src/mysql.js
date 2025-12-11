@@ -131,6 +131,10 @@ async function ensureSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    const [ordIdx] = await conn.query('SHOW INDEX FROM orders WHERE Key_name = "uniq_orders_payment_id"');
+    if (!ordIdx || ordIdx.length === 0) {
+      await conn.query('ALTER TABLE orders ADD UNIQUE KEY uniq_orders_payment_id (mp_payment_id)');
+    }
     await conn.query(`CREATE TABLE IF NOT EXISTS order_items (
       id INT AUTO_INCREMENT PRIMARY KEY,
       order_id INT NOT NULL,
@@ -622,5 +626,13 @@ exports.listPaidOrdersDetailed = async () => {
       buyer: { nome: o.nome, cidade: o.cidade, cpf: o.cpf },
       items: itemsMap[o.id] || []
     }));
+  } finally { conn.release(); }
+};
+
+exports.deleteUnpaidOrders = async () => {
+  const conn = await pool.getConnection();
+  try {
+    const [r] = await conn.execute('DELETE FROM orders WHERE mp_status IS NULL OR mp_status NOT IN ("approved")');
+    return r.affectedRows || 0;
   } finally { conn.release(); }
 };

@@ -1,4 +1,4 @@
-const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus, getOrder } = require('../mysql');
+const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus, getOrder, deleteUnpaidOrders } = require('../mysql');
 const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
 
@@ -179,6 +179,15 @@ exports.approveOrderManual = async (req, res) => {
     await updateOrderPaymentStatus(id, 'approved');
     await clearCartForUser(order.user_id);
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+};
+
+exports.purgeUnpaidOrders = async (req, res) => {
+  try {
+    const deleted = await deleteUnpaidOrders();
+    res.json({ ok: true, deleted });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
