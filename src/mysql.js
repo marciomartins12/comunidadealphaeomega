@@ -108,6 +108,16 @@ async function ensureSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+    await conn.execute(
+      'UPDATE cart_items c JOIN (SELECT user_id, product_id, size, MIN(id) AS keep_id, SUM(qty) AS sum_qty, COUNT(*) cnt FROM cart_items GROUP BY user_id, product_id, size HAVING cnt > 1) d ON c.id = d.keep_id SET c.qty = d.sum_qty'
+    );
+    await conn.execute(
+      'DELETE c FROM cart_items c JOIN (SELECT user_id, product_id, size, MIN(id) AS keep_id, COUNT(*) cnt FROM cart_items GROUP BY user_id, product_id, size HAVING cnt > 1) d ON c.user_id = d.user_id AND c.product_id = d.product_id AND c.size = d.size WHERE c.id <> d.keep_id'
+    );
+    const [cartIdx] = await conn.query('SHOW INDEX FROM cart_items WHERE Key_name = "uniq_cart_user_prod_size"');
+    if (!cartIdx || cartIdx.length === 0) {
+      await conn.query('ALTER TABLE cart_items ADD UNIQUE KEY uniq_cart_user_prod_size (user_id, product_id, size)');
+    }
     await conn.query(`CREATE TABLE IF NOT EXISTS orders (
       id INT AUTO_INCREMENT PRIMARY KEY,
       user_id INT NOT NULL,
@@ -294,7 +304,10 @@ exports.updateUserPasswordByEmailCpf = async ({ email, cpf, senha_hash }) => {
 exports.addCartItem = async ({ user_id, product_id, name, size, qty, price }) => {
   const conn = await pool.getConnection();
   try {
-    await conn.execute('INSERT INTO cart_items (user_id, product_id, name, size, qty, price) VALUES (?,?,?,?,?,?)', [user_id, product_id, name, size, qty, price]);
+    await conn.execute(
+      'INSERT INTO cart_items (user_id, product_id, name, size, qty, price) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), name = VALUES(name), price = VALUES(price)',
+      [user_id, product_id, name, size, qty, price]
+    );
   } finally { conn.release(); }
 };
 
@@ -380,6 +393,28 @@ exports.updateOrderPaymentData = async (id, data) => {
   } finally { conn.release(); }
 };
 
+exports.updateOrderWithItemsAndPayment = async ({ id, items, total, payment }) => {
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    await conn.execute('DELETE FROM order_items WHERE order_id = ?', [id]);
+    for (const it of items) {
+      await conn.execute(
+        'INSERT INTO order_items (order_id, product_id, name, size, qty, price) VALUES (?,?,?,?,?,?)',
+        [id, it.product_id, it.name, it.size, it.qty, it.price]
+      );
+    }
+    await conn.execute(
+      'UPDATE orders SET total = ?, mp_payment_id = ?, mp_qr_code = ?, mp_qr_base64 = ?, mp_ticket_url = ?, mp_status = ?, paid_at = NULL WHERE id = ?',
+      [total, payment.payment_id || null, payment.qr_code || null, payment.qr_base64 || null, payment.ticket_url || null, 'pending', id]
+    );
+    await conn.commit();
+  } catch (e) {
+    await conn.rollback();
+    throw e;
+  } finally { conn.release(); }
+};
+
 exports.getInscricaoByPaymentId = async (mp_payment_id) => {
   const conn = await pool.getConnection();
   try {
@@ -417,6 +452,25 @@ exports.getOrdersForUser = async (user_id) => {
   try {
     const [rows] = await conn.execute('SELECT id, total, mp_status, mp_payment_id, paid_at, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC', [user_id]);
     return rows;
+  } finally { conn.release(); }
+};
+
+exports.getPendingOrderForUser = async (user_id) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT * FROM orders WHERE user_id = ? AND (mp_status IS NULL OR mp_status IN ("pending","in_process")) ORDER BY id DESC LIMIT 1', [user_id]);
+    return rows[0] || null;
+  } finally { conn.release(); }
+};
+
+exports.cancelPendingOrderForUser = async (user_id) => {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.execute('SELECT id FROM orders WHERE user_id = ? AND (mp_status IS NULL OR mp_status IN ("pending","in_process")) ORDER BY id DESC LIMIT 1', [user_id]);
+    const row = rows[0];
+    if (!row) return false;
+    await conn.execute('UPDATE orders SET mp_status = ?, paid_at = NULL WHERE id = ?', ['canceled', row.id]);
+    return true;
   } finally { conn.release(); }
 };
 

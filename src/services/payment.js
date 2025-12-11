@@ -12,9 +12,13 @@ exports.createPixPayment = async ({ amount, description, nome, cpf }) => {
   if (!paymentClient) {
     throw new Error('MP_ACCESS_TOKEN não configurado');
   }
-
+  const amtNum = Number(amount);
+  const transaction_amount = Number.isFinite(amtNum) ? Number(amtNum.toFixed(2)) : NaN;
+  if (!Number.isFinite(transaction_amount) || transaction_amount <= 0) {
+    throw new Error('Invalid transaction_amount');
+  }
   const body = {
-    transaction_amount: amount,
+    transaction_amount,
     description,
     payment_method_id: 'pix',
     notification_url: process.env.MP_NOTIFICATION_URL || undefined,

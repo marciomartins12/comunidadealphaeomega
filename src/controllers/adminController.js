@@ -81,7 +81,7 @@ exports.viewPedidos = async (req, res) => {
   });
   const fee = 0.0099;
   const netTotal = rows.reduce((acc, r) => acc + Number(r.total || 0) * (1 - fee), 0);
-  const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
+  const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG', 'U'];
   const productMap = {};
   for (const r of rows) {
     for (const it of r.items || []) {
@@ -90,7 +90,8 @@ exports.viewPedidos = async (req, res) => {
       if (!productMap[pid]) {
         const isRegular = pid.endsWith('_regular');
         const counts = {}; sizes.forEach(s => counts[s] = 0);
-        productMap[pid] = { name: it.name, type: isRegular ? 'Regular' : 'Oversized', counts };
+        const type = pid === 'cordao_alfa_omega' ? 'Acessório' : (isRegular ? 'Regular' : 'Oversized');
+        productMap[pid] = { name: it.name, type, counts };
       }
       const sz = sizes.includes(String(it.size)) ? String(it.size) : null;
       if (sz) productMap[pid].counts[sz] += Number(it.qty || 0);
@@ -100,7 +101,9 @@ exports.viewPedidos = async (req, res) => {
     ...p,
     sizes: sizes.filter(s => Number(p.counts[s] || 0) > 0).map(s => `${s}: ${p.counts[s]}`)
   }));
-  res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length, netTotalBRL: money.format(netTotal), productsSummary });
+  const cordaoCounts = productMap['cordao_alfa_omega'] ? productMap['cordao_alfa_omega'].counts : null;
+  const cordaoTotal = cordaoCounts ? Object.values(cordaoCounts).reduce((acc, n) => acc + Number(n || 0), 0) : 0;
+  res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length, netTotalBRL: money.format(netTotal), productsSummary, cordaoTotal });
 };
 
 exports.viewDoacoes = async (req, res) => {

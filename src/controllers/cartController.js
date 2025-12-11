@@ -1,36 +1,36 @@
-const { addCartItem, getCartItemsForUser, updateCartItem, deleteCartItem, createOrderWithItems, getOrder, updateOrderPaymentStatus, updateOrderPaymentData, getPaidOrdersForUser, getOrderItems, clearCartForUser, getOrdersForUser } = require('../mysql');
+const { addCartItem, getCartItemsForUser, updateCartItem, deleteCartItem, createOrderWithItems, getOrder, updateOrderPaymentStatus, updateOrderPaymentData, getPaidOrdersForUser, getOrderItems, clearCartForUser, getOrdersForUser, getPendingOrderForUser, updateOrderWithItemsAndPayment, cancelPendingOrderForUser } = require('../mysql');
 const { createPixPayment, getPaymentStatus } = require('../services/payment');
 
 const products = {
   quadrinho_pb_branca: {
     id: 'quadrinho_pb_branca',
     name: 'Quadrinho P&B Santos',
-    price: 68.0,
+    price: 0.16,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSP&BBRANCAOVERSIZED.png'
   },
   quadrinho_pb_branca_regular: {
     id: 'quadrinho_pb_branca_regular',
     name: 'Quadrinho P&B Santos (regular)',
-    price: 52.0,
+    price: 0.15,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSP&B-BRANCA.png'
   },
   quadrinho_color_preta: {
     id: 'quadrinho_color_preta',
     name: 'Quadrinho Color Santos',
-    price: 68.0,
+    price: 0.16,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSCOLOR-PRETA OVERSIZED.png'
   },
   quadrinho_color_preta_regular: {
     id: 'quadrinho_color_preta_regular',
     name: 'Quadrinho Color Santos (preta regular)',
-    price: 52.0,
+    price: 0.15,
     image: '/public/img/loja/MODELOQUADRINHOSANTOSCOLORPRETA.png'
   }
   ,
   cordao_alfa_omega: {
     id: 'cordao_alfa_omega',
     name: 'Cordão Alfa&Ômega',
-    price: 12.0,
+    price: 0.1,
     image: '/public/img/loja/cordao.jpeg'
   }
 };
@@ -44,7 +44,7 @@ exports.add = async (req, res) => {
     if (!p) return res.status(400).json({ ok: false, error: 'invalid_product' });
     const q = Math.max(1, Math.min(parseInt(qty || '1', 10), 99));
     const s = String(size || '').toUpperCase();
-    if (!['PP', 'P', 'M', 'G', 'GG', 'XG'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
+    if (!['PP', 'P', 'M', 'G', 'GG', 'XG', 'U'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
     await addCartItem({ user_id: u.id, product_id: p.id, name: p.name, size: s, qty: q, price: p.price });
     res.json({ ok: true, redirect: '/carrinho' });
   } catch (e) {
@@ -56,6 +56,7 @@ exports.view = async (req, res) => {
   const u = req.session.user;
   if (!u) return res.redirect('/login?next=/carrinho');
   const items = await getCartItemsForUser(u.id);
+  const pendingOrder = await getPendingOrderForUser(u.id);
   const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const mapped = items.map(it => ({
     ...it,
@@ -73,7 +74,7 @@ exports.view = async (req, res) => {
   }));
   const total = items.reduce((acc, it) => acc + Number(products[it.product_id]?.price ?? it.price) * Number(it.qty), 0);
   const valor = fmt.format(total);
-  res.render('carrinho', { pageTitle: 'Carrinho', items: mapped, totalBRL: valor, pageClass: 'cart-page' });
+  res.render('carrinho', { pageTitle: 'Carrinho', items: mapped, totalBRL: valor, pageClass: 'cart-page', pendingOrderId: pendingOrder?.id || null, pendingOrderTotalBRL: pendingOrder ? fmt.format(Number(pendingOrder.total || 0)) : null });
 };
 
 exports.updateItem = async (req, res) => {
@@ -81,7 +82,7 @@ exports.updateItem = async (req, res) => {
   if (!u) return res.status(401).json({ ok: false, error: 'login_required' });
   const { id, size, qty } = req.body;
   const s = String(size || '').toUpperCase();
-  if (!['PP', 'P', 'M', 'G', 'GG', 'XG'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
+  if (!['PP', 'P', 'M', 'G', 'GG', 'XG', 'U'].includes(s)) return res.status(400).json({ ok: false, error: 'invalid_size' });
   const q = Math.max(1, Math.min(parseInt(qty || '1', 10), 99));
   await updateCartItem({ user_id: u.id, id, size: s, qty: q });
   res.json({ ok: true });
@@ -99,10 +100,28 @@ exports.checkout = async (req, res) => {
   try {
     const u = req.session.user;
     if (!u) return res.redirect('/login?next=/carrinho');
+    const existing = await getPendingOrderForUser(u.id);
     const items = await getCartItemsForUser(u.id);
     if (!items || items.length === 0) return res.redirect('/carrinho');
-    const total = items.reduce((acc, it) => acc + Number(products[it.product_id]?.price ?? it.price) * Number(it.qty), 0);
+    const totalRaw = items.reduce((acc, it) => {
+      const unit = products[it.product_id]?.price;
+      const base = unit != null ? Number(unit) : Number(it.price);
+      const qty = Number(it.qty);
+      const line = (Number.isFinite(base) ? base : 0) * (Number.isFinite(qty) ? qty : 0);
+      return acc + line;
+    }, 0);
+    const total = Number(totalRaw.toFixed(2));
+    if (!Number.isFinite(total) || total <= 0) return res.status(400).send('Total inválido para pagamento');
     const pay = await createPixPayment({ amount: total, description: 'Compra Loja RC', nome: u.nome, cpf: u.cpf });
+    if (existing) {
+      await updateOrderWithItemsAndPayment({ id: existing.id, items: items.map(it => ({ product_id: it.product_id, name: it.name, size: it.size, qty: it.qty, price: (products[it.product_id]?.price ?? it.price) })), total, payment: {
+        payment_id: pay.payment_id,
+        qr_code: pay.qr_code,
+        qr_base64: pay.qr_base64,
+        ticket_url: pay.ticket_url
+      } });
+      return res.redirect(`/loja/pagamento/${existing.id}`);
+    }
     const orderId = await createOrderWithItems({ user_id: u.id, items: items.map(it => ({ product_id: it.product_id, name: it.name, size: it.size, qty: it.qty, price: (products[it.product_id]?.price ?? it.price) })), payment: {
       payment_id: pay.payment_id,
       qr_code: pay.qr_code,
@@ -212,4 +231,10 @@ exports.count = async (req, res) => {
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
+};
+exports.cancelPending = async (req, res) => {
+  const u = req.session.user;
+  if (!u) return res.status(401).json({ ok: false, error: 'login_required' });
+  const canceled = await cancelPendingOrderForUser(u.id);
+  res.json({ ok: true, canceled });
 };

@@ -36,6 +36,7 @@ router.get('/carrinho', cart.view);
 router.post('/cart/item/update', cart.updateItem);
 router.post('/cart/item/delete', cart.deleteItem);
 router.post('/carrinho/checkout', cart.checkout);
+router.post('/carrinho/cancel', cart.cancelPending);
 router.get('/loja/pagamento/:id', cart.pagamentoLoja);
 router.get('/loja/pagamento/status/:id', cart.pagamentoLojaStatus);
 router.get('/carrinho/historico', cart.historico);

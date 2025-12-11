@@ -116,9 +116,13 @@
     if (btnBuy) {
       btnBuy.addEventListener('click', async (e) => {
         e.preventDefault();
+        if (btnBuy.disabled) return;
+        btnBuy.disabled = true;
+        const prevText = btnBuy.textContent;
+        btnBuy.textContent = 'Adicionando...';
         const product_id = btnBuy.getAttribute('data-product-id');
         const qtyEl = prod.querySelector('.qty-input');
-        const size = 'M';
+        const size = product_id === 'cordao_alfa_omega' ? 'U' : 'M';
         const qty = qtyEl ? qtyEl.value : '1';
         try {
           const r = await fetch('/cart/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product_id, size, qty }) });
@@ -126,6 +130,7 @@
           if (r.status === 401) { window.location.href = data.loginUrl || '/login?next=/carrinho'; return; }
           if (data.ok && data.redirect) { window.location.href = data.redirect; }
         } catch {}
+        finally { btnBuy.disabled = false; btnBuy.textContent = prevText; }
       });
     }
   });

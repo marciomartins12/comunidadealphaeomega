@@ -6,7 +6,8 @@
         <div class="shop-oval"><img class="shop-oval-img" src="/public/img/loja/logoSTORE.png" alt="RC Store"/></div>
       </div>
     </div>
-    <div class="shop-topbar"><a class="shop-back" href="/loja">Voltar para a loja</a><a class="shop-hist" href="#" id="histBtn">Ver histórico de compras</a></div>
+  <div class="shop-topbar"><a class="shop-back" href="/loja">Voltar para a loja</a><a class="shop-hist" href="#" id="histBtn">Ver histórico de compras</a></div>
+  {{!-- aviso removido: atualização agora acontece automaticamente no checkout --}}
     <h2 class="shop-title">Itens</h2>
     {{#if items.length}}
       {{#each items}}
@@ -89,13 +90,21 @@
   if (btn) {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.textContent = 'Processando...';
       try {
         const r = await fetch('/carrinho/checkout', { method: 'POST' });
         if (r.redirected) { window.location.href = r.url; return; }
         const t = await r.text(); alert(t || 'Falha ao iniciar pagamento');
       } catch {}
+      finally {
+        btn.disabled = false;
+        btn.textContent = 'Pagar';
+      }
     });
   }
+  
   const hbtn = document.getElementById('histBtn');
   const getEls = () => ({
     overlay: document.getElementById('histOverlay'),

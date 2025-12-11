@@ -14,6 +14,9 @@
         </div>
         <div class="summary-card">
           <div class="summary-title">Tamanhos por produto</div>
+          {{#if cordaoTotal}}
+          <div class="summary-note">Cordões pagos: {{cordaoTotal}}</div>
+          {{/if}}
           <div class="products-list">
             {{#each productsSummary}}
               <div class="product-item">

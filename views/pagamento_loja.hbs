@@ -25,6 +25,7 @@
       <a class="payment-link" href="{{ticket_url}}" target="_blank" rel="noopener">Pagar no site do Mercado Pago</a>
     {{/if}}
 
+    <p class="payment-help" id="updatedInfo">Pedido atualizado com seu carrinho. Se você alterou o carrinho, este pedido já reflete os itens e o total atualizados.</p>
     <p class="payment-help">Dúvidas? Fale com a secretaria.</p>
   </div>
   <script>
@@ -39,6 +40,7 @@
         const pt = { approved: 'Aprovado', pending: 'Pendente', in_process: 'Em análise', rejected: 'Recusado', expired: 'Expirado' };
         statusEl.textContent = pt[data.status] || data.status;
         const box = document.getElementById('paidBox');
+        const info = document.getElementById('updatedInfo');
         if (data.paid) {
           const qr = document.querySelector('.payment-qr');
           const code = document.querySelector('.payment-code');
@@ -47,8 +49,10 @@
           if(code) code.style.display='none';
           if(link) link.style.display='none';
           if(box) box.hidden = false;
+          if(info) info.style.display='none';
         } else {
           if(box) box.hidden = true;
+          if(info) info.style.display='';
         }
         if (data.recreated) { location.reload(); }
       }catch{}
