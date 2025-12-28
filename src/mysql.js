@@ -40,6 +40,7 @@ async function ensureSchema() {
       emergencia VARCHAR(255) NOT NULL,
       endereco VARCHAR(255) NOT NULL,
       frase TEXT NOT NULL,
+      responsavel_nome VARCHAR(255) NULL,
       cpf VARCHAR(14) NOT NULL,
       doc_blob LONGBLOB NOT NULL,
       doc_mime VARCHAR(100) NOT NULL,
@@ -76,6 +77,10 @@ async function ensureSchema() {
     const [paidAtCol] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE "paid_at"');
     if (!paidAtCol || paidAtCol.length === 0) {
       await conn.query('ALTER TABLE inscricoes ADD COLUMN paid_at TIMESTAMP NULL');
+    }
+    const [respCol] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE "responsavel_nome"');
+    if (!respCol || respCol.length === 0) {
+      await conn.query('ALTER TABLE inscricoes ADD COLUMN responsavel_nome VARCHAR(255) NULL AFTER frase');
     }
     await conn.query(`CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -182,11 +187,11 @@ ensureDatabase().then(ensureSchema).catch(console.error);
 
 exports.saveInscricao = async (data) => {
   const sql = `INSERT INTO inscricoes (
-    nome, sexo, nascimento, whatsapp, emergencia, endereco, frase, cpf,
+    nome, sexo, nascimento, whatsapp, emergencia, endereco, frase, responsavel_nome, cpf,
     doc_blob, doc_mime, foto_blob, foto_mime, foto_santo_blob, foto_santo_mime,
     termo_blob, termo_mime, justificativa_blob, justificativa_mime,
     mp_payment_id, mp_qr_code, mp_qr_base64, mp_ticket_url, mp_status
-  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
   const params = [
     data.nome,
@@ -196,6 +201,7 @@ exports.saveInscricao = async (data) => {
     data.emergencia,
     data.endereco,
     data.frase,
+    data.responsavel_nome || null,
     data.cpf,
     data.doc_blob, data.doc_mime,
     data.foto_blob, data.foto_mime,

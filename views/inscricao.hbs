@@ -42,6 +42,11 @@
             <input type="date" name="nascimento" required>
           </label>
 
+          <label class="form-field form-col" id="respField" hidden>
+            <span>Para participantes menores de 17 anos, nome completo do responsável (pai ou mãe) que o acompanhará</span>
+            <input type="text" name="responsavel" id="responsavel">
+          </label>
+
           <label class="form-field">
             <span>Contato pessoal/WhatsApp</span>
             <input type="tel" name="whatsapp" required>
@@ -58,7 +63,7 @@
           </label>
 
           <label class="form-field form-col">
-            <span>Endereço</span>
+            <span>Cidade / Paróquia</span>
             <input type="text" name="endereco" required>
           </label>
 
@@ -149,6 +154,8 @@
       const nascInput = document.querySelector('input[name="nascimento"]');
       const termField = document.getElementById('termField');
       const termoInput = document.getElementById('termo');
+      const respField = document.getElementById('respField');
+      const responsavelInput = document.getElementById('responsavel');
       function ageFrom(d){
         try{const dt=new Date(d); if(isNaN(dt)) return null; const today=new Date(); let age=today.getFullYear()-dt.getFullYear(); const m=today.getMonth()-dt.getMonth(); if(m<0 || (m===0 && today.getDate()<dt.getDate())) age--; return age; }catch{return null}
       }
@@ -156,8 +163,11 @@
         const age=ageFrom(nascInput.value);
         const minor = age!==null && age<=17;
         termField.hidden = !minor;
+        respField.hidden = !minor;
         if(minor){ termoInput.setAttribute('required','required'); }
         else { termoInput.removeAttribute('required'); termoInput.value=''; }
+        if(minor){ responsavelInput.setAttribute('required','required'); }
+        else { responsavelInput.removeAttribute('required'); responsavelInput.value=''; }
       }
       nascInput.addEventListener('change', toggleTerm);
       nascInput.addEventListener('input', toggleTerm);

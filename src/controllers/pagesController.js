@@ -68,6 +68,8 @@ exports.inscricaoPost = async (req, res) => {
     const age = ageFrom(b.nascimento);
     if (age !== null && age <= 17) {
       must(termoF, 'Termo de responsabilidade');
+      const resp = String(b.responsavel || '').trim();
+      if (!resp) throw new Error('Nome do responsável é obrigatório para menores de 17 anos');
     }
 
     const payment = await createPixPayment({
@@ -85,6 +87,7 @@ exports.inscricaoPost = async (req, res) => {
       emergencia: b.emergencia,
       endereco: b.endereco,
       frase: b.frase,
+      responsavel_nome: String(b.responsavel || '').trim() || null,
       cpf: cpfPlain,
       doc_blob: docF?.buffer, doc_mime: docF?.mimetype || 'application/octet-stream',
       foto_blob: fotoF?.buffer, foto_mime: fotoF?.mimetype || 'application/octet-stream',
