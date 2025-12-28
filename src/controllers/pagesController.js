@@ -66,7 +66,7 @@ exports.inscricaoPost = async (req, res) => {
       const confirmed = String(b.underAgeConfirm || '').trim();
       if (!confirmed) throw new Error('Confirmação de idade é obrigatória');
       const resp = String(b.responsavel || '').trim();
-      if (!resp) throw new Error('Nome do responsável é obrigatório para menores de 17 anos');
+      if (!resp) throw new Error('Nome do responsável é obrigatório para menores de 16 anos');
     }
 
     const payment = await createPixPayment({
