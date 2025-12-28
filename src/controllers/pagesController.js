@@ -48,8 +48,6 @@ exports.inscricaoPost = async (req, res) => {
     const docF = f.doc?.[0];
     const fotoF = f.foto?.[0];
     const fotoSantoF = f.fotoSanto?.[0];
-    const termoF = f.termo?.[0];
-    const justificativaF = f.justificativa?.[0];
 
     const allowed = (m) => m && (m.startsWith('image/') || m === 'application/pdf');
     const must = (file, name) => {
@@ -59,15 +57,14 @@ exports.inscricaoPost = async (req, res) => {
     must(docF, 'Documento de identificação');
     must(fotoF, 'Foto pessoal');
     must(fotoSantoF, 'Foto com santo de devoção');
-    if (termoF && !allowed(termoF.mimetype)) throw new Error('Termo de responsabilidade deve ser imagem ou PDF');
-    if (justificativaF && !allowed(justificativaF.mimetype)) throw new Error('Justificativa deve ser imagem ou PDF');
 
     const ageFrom = (d) => {
       try { const dt = new Date(d); if (isNaN(dt)) return null; const today = new Date(); let age = today.getFullYear() - dt.getFullYear(); const m = today.getMonth() - dt.getMonth(); if (m < 0 || (m === 0 && today.getDate() < dt.getDate())) age--; return age; } catch { return null; }
     };
     const age = ageFrom(b.nascimento);
-    if (age !== null && age <= 17) {
-      must(termoF, 'Termo de responsabilidade');
+    if (age !== null && age <= 16) {
+      const confirmed = String(b.underAgeConfirm || '').trim();
+      if (!confirmed) throw new Error('Confirmação de idade é obrigatória');
       const resp = String(b.responsavel || '').trim();
       if (!resp) throw new Error('Nome do responsável é obrigatório para menores de 17 anos');
     }
@@ -88,12 +85,13 @@ exports.inscricaoPost = async (req, res) => {
       endereco: b.endereco,
       frase: b.frase,
       responsavel_nome: String(b.responsavel || '').trim() || null,
+      justificativa_texto: String(b.justificativa_texto || '').trim() || null,
       cpf: cpfPlain,
       doc_blob: docF?.buffer, doc_mime: docF?.mimetype || 'application/octet-stream',
       foto_blob: fotoF?.buffer, foto_mime: fotoF?.mimetype || 'application/octet-stream',
       foto_santo_blob: fotoSantoF?.buffer, foto_santo_mime: fotoSantoF?.mimetype || 'application/octet-stream',
-      termo_blob: termoF?.buffer, termo_mime: termoF?.mimetype || null,
-      justificativa_blob: justificativaF?.buffer, justificativa_mime: justificativaF?.mimetype || null,
+      termo_blob: null, termo_mime: null,
+      justificativa_blob: null, justificativa_mime: null,
       mp_payment_id: payment.payment_id,
       mp_qr_code: payment.qr_code,
       mp_qr_base64: payment.qr_base64,

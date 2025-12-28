@@ -13,7 +13,14 @@ let pool;
 async function ensureDatabase() {
   const conn = await mysql.createConnection({ host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASSWORD });
   try {
-    await conn.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+    try {
+      await conn.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+    } catch (e) {
+      const code = e && e.code;
+      if (code !== 'ER_DBACCESS_DENIED_ERROR' && code !== 'ER_SPECIFIC_ACCESS_DENIED_ERROR') {
+        throw e;
+      }
+    }
   } finally {
     await conn.end();
   }
@@ -52,6 +59,7 @@ async function ensureSchema() {
       termo_mime VARCHAR(100) NULL,
       justificativa_blob LONGBLOB NULL,
       justificativa_mime VARCHAR(100) NULL,
+      justificativa_texto TEXT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       mp_payment_id VARCHAR(64),
       mp_qr_code TEXT,
@@ -62,26 +70,32 @@ async function ensureSchema() {
   const conn = await pool.getConnection();
   try {
     await conn.query(sql);
+
+    const ensureCol = async (col, alterSql) => {
+      const [rows] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE ?', [col]);
+      if (!rows || rows.length === 0) {
+        await conn.query(alterSql);
+      }
+    };
+
     const [idx] = await conn.query("SHOW INDEX FROM inscricoes WHERE Key_name='uniq_cpf'");
     if (!idx || idx.length === 0) {
       await conn.query('ALTER TABLE inscricoes ADD UNIQUE KEY uniq_cpf (cpf)');
     }
-    const [cols] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE "mp_ticket_url"');
-    if (!cols || cols.length === 0) {
-      await conn.query('ALTER TABLE inscricoes ADD COLUMN mp_ticket_url TEXT');
-    }
-    const [statusCol] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE "mp_status"');
-    if (!statusCol || statusCol.length === 0) {
-      await conn.query('ALTER TABLE inscricoes ADD COLUMN mp_status VARCHAR(50)');
-    }
-    const [paidAtCol] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE "paid_at"');
-    if (!paidAtCol || paidAtCol.length === 0) {
-      await conn.query('ALTER TABLE inscricoes ADD COLUMN paid_at TIMESTAMP NULL');
-    }
-    const [respCol] = await conn.query('SHOW COLUMNS FROM inscricoes LIKE "responsavel_nome"');
-    if (!respCol || respCol.length === 0) {
-      await conn.query('ALTER TABLE inscricoes ADD COLUMN responsavel_nome VARCHAR(255) NULL AFTER frase');
-    }
+
+    await ensureCol('responsavel_nome', 'ALTER TABLE inscricoes ADD COLUMN responsavel_nome VARCHAR(255) NULL AFTER frase');
+    await ensureCol('termo_blob', 'ALTER TABLE inscricoes ADD COLUMN termo_blob LONGBLOB NULL');
+    await ensureCol('termo_mime', 'ALTER TABLE inscricoes ADD COLUMN termo_mime VARCHAR(100) NULL');
+    await ensureCol('justificativa_blob', 'ALTER TABLE inscricoes ADD COLUMN justificativa_blob LONGBLOB NULL');
+    await ensureCol('justificativa_mime', 'ALTER TABLE inscricoes ADD COLUMN justificativa_mime VARCHAR(100) NULL');
+    await ensureCol('justificativa_texto', 'ALTER TABLE inscricoes ADD COLUMN justificativa_texto TEXT NULL');
+    await ensureCol('mp_payment_id', 'ALTER TABLE inscricoes ADD COLUMN mp_payment_id VARCHAR(64)');
+    await ensureCol('mp_qr_code', 'ALTER TABLE inscricoes ADD COLUMN mp_qr_code TEXT');
+    await ensureCol('mp_qr_base64', 'ALTER TABLE inscricoes ADD COLUMN mp_qr_base64 MEDIUMTEXT');
+    await ensureCol('mp_ticket_url', 'ALTER TABLE inscricoes ADD COLUMN mp_ticket_url TEXT');
+    await ensureCol('mp_status', 'ALTER TABLE inscricoes ADD COLUMN mp_status VARCHAR(50)');
+    await ensureCol('paid_at', 'ALTER TABLE inscricoes ADD COLUMN paid_at TIMESTAMP NULL');
+
     await conn.query(`CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
       nome VARCHAR(255) NOT NULL,
@@ -189,9 +203,9 @@ exports.saveInscricao = async (data) => {
   const sql = `INSERT INTO inscricoes (
     nome, sexo, nascimento, whatsapp, emergencia, endereco, frase, responsavel_nome, cpf,
     doc_blob, doc_mime, foto_blob, foto_mime, foto_santo_blob, foto_santo_mime,
-    termo_blob, termo_mime, justificativa_blob, justificativa_mime,
+    termo_blob, termo_mime, justificativa_blob, justificativa_mime, justificativa_texto,
     mp_payment_id, mp_qr_code, mp_qr_base64, mp_ticket_url, mp_status
-  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
   const params = [
     data.nome,
@@ -208,6 +222,7 @@ exports.saveInscricao = async (data) => {
     data.foto_santo_blob, data.foto_santo_mime,
     data.termo_blob || null, data.termo_mime || null,
     data.justificativa_blob || null, data.justificativa_mime || null,
+    data.justificativa_texto || null,
     data.mp_payment_id || null,
     data.mp_qr_code || null,
     data.mp_qr_base64 || null,

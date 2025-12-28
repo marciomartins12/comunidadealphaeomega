@@ -276,6 +276,8 @@ body.modal-open { overflow: hidden; }
 .form-field { display: grid; gap: 6px; }
 .form-field span { font-size: 14px; font-weight: 900; color: var(--text); }
 .form-field input, .form-field select, .form-field textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--black); border-radius: 6px; font-size: 14px; background: #fff; }
+.form-field input[type="checkbox"] { width: auto; padding: 0; border: none; background: transparent; box-shadow: none; }
+.form-field input[type="checkbox"]:focus { box-shadow: none; }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: var(--black); box-shadow: 0 2px 0 rgba(0,0,0,0.4); }
 .form-col { grid-column: 1 / -1; }
 .form-actions { display: flex; justify-content: flex-end; margin-top: 16px; }

@@ -19,9 +19,7 @@ router.post('/inscricao', (req, res, next) => {
   up.fields([
     { name: 'doc', maxCount: 1 },
     { name: 'foto', maxCount: 1 },
-    { name: 'fotoSanto', maxCount: 1 },
-    { name: 'termo', maxCount: 1 },
-    { name: 'justificativa', maxCount: 1 }
+    { name: 'fotoSanto', maxCount: 1 }
   ])(req, res, (err) => err ? next(err) : pages.inscricaoPost(req, res, next));
 });
 router.get('/inscricao/status', pages.inscricaoStatus);

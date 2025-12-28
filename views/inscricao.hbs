@@ -42,10 +42,13 @@
             <input type="date" name="nascimento" required>
           </label>
 
-          <label class="form-field form-col" id="respField" hidden>
-            <span>Para participantes menores de 17 anos, nome completo do responsável (pai ou mãe) que o acompanhará</span>
-            <input type="text" name="responsavel" id="responsavel">
-          </label>
+          <div class="form-field form-col" id="underAgeField" hidden>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:0;border:0">
+              <input type="checkbox" name="underAgeConfirm" id="underAgeConfirm" style="flex:0 0 auto;margin:2px 0 0 0">
+              <span style="flex:1 1 auto;min-width:0">Declaro que tenho 17 anos. Abaixo o nome do responsável.</span>
+            </label>
+            <input type="text" name="responsavel" id="responsavel" placeholder="Nome completo do responsável">
+          </div>
 
           <label class="form-field">
             <span>Contato pessoal/WhatsApp</span>
@@ -90,14 +93,9 @@
             <input type="file" name="fotoSanto" accept="image/*" required>
           </label>
 
-          <label class="form-field form-col" id="termField" hidden>
-            <span>Termo de responsabilidade (obrigatório para menores de 18 anos)</span>
-            <input type="file" name="termo" id="termo" accept="image/*,.pdf">
-          </label>
-
           <label class="form-field form-col">
             <span>Justificativa de chegada no sábado</span>
-            <input type="file" name="justificativa" accept="image/*,.pdf">
+            <textarea name="justificativa_texto" rows="3" placeholder="Digite o motivo"></textarea>
           </label>
         </div>
 
@@ -152,33 +150,36 @@
         cpfInput.value = m;
       });
       const nascInput = document.querySelector('input[name="nascimento"]');
-      const termField = document.getElementById('termField');
-      const termoInput = document.getElementById('termo');
-      const respField = document.getElementById('respField');
+      const underAgeField = document.getElementById('underAgeField');
+      const underAgeConfirm = document.getElementById('underAgeConfirm');
       const responsavelInput = document.getElementById('responsavel');
       function ageFrom(d){
         try{const dt=new Date(d); if(isNaN(dt)) return null; const today=new Date(); let age=today.getFullYear()-dt.getFullYear(); const m=today.getMonth()-dt.getMonth(); if(m<0 || (m===0 && today.getDate()<dt.getDate())) age--; return age; }catch{return null}
       }
-      function toggleTerm(){
+      function toggleUnderAge(){
         const age=ageFrom(nascInput.value);
-        const minor = age!==null && age<=17;
-        termField.hidden = !minor;
-        respField.hidden = !minor;
-        if(minor){ termoInput.setAttribute('required','required'); }
-        else { termoInput.removeAttribute('required'); termoInput.value=''; }
-        if(minor){ responsavelInput.setAttribute('required','required'); }
-        else { responsavelInput.removeAttribute('required'); responsavelInput.value=''; }
+        const under = age!==null && age<=16;
+        underAgeField.hidden = !under;
+        if(under){
+          underAgeConfirm.setAttribute('required','required');
+          responsavelInput.setAttribute('required','required');
+        } else {
+          underAgeConfirm.removeAttribute('required');
+          underAgeConfirm.checked = false;
+          responsavelInput.removeAttribute('required');
+          responsavelInput.value='';
+        }
       }
-      nascInput.addEventListener('change', toggleTerm);
-      nascInput.addEventListener('input', toggleTerm);
-      toggleTerm();
+      nascInput.addEventListener('change', toggleUnderAge);
+      nascInput.addEventListener('input', toggleUnderAge);
+      toggleUnderAge();
       document.getElementById('inscricaoForm').addEventListener('submit', async (e) => {
         if (!cpfValido(cpfInput.value)) {
           e.preventDefault();
           alert('CPF inválido');
           return;
         }
-        toggleTerm();
+        toggleUnderAge();
         try {
           const c = limpa(cpfInput.value);
           const r = await fetch(`/inscricao/status?cpf=${c}`);
