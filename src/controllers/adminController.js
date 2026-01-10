@@ -1,4 +1,4 @@
-const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus, getOrder, deleteUnpaidOrders } = require('../mysql');
+const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus, getOrder, deleteUnpaidOrders, getInscricao } = require('../mysql');
 const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
 
@@ -201,5 +201,40 @@ exports.purgeUnpaidOrders = async (req, res) => {
     res.json({ ok: true, deleted });
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
+  }
+};
+
+// Baixa arquivo da inscrição (doc, foto, santo)
+exports.downloadInscricaoFile = async (req, res) => {
+  try {
+    const { id, tipo } = req.params;
+    const insc = await getInscricao(id);
+    if (!insc) return res.status(404).send('Inscrição não encontrada');
+
+    let blob, mime, filename;
+    if (tipo === 'doc') {
+      blob = insc.doc_blob;
+      mime = insc.doc_mime;
+      filename = `doc_${insc.cpf}.${mime.split('/')[1]}`;
+    } else if (tipo === 'foto') {
+      blob = insc.foto_blob;
+      mime = insc.foto_mime;
+      filename = `foto_${insc.cpf}.${mime.split('/')[1]}`;
+    } else if (tipo === 'santo') {
+      blob = insc.foto_santo_blob;
+      mime = insc.foto_santo_mime;
+      filename = `santo_${insc.cpf}.${mime.split('/')[1]}`;
+    } else {
+      return res.status(400).send('Tipo de arquivo inválido');
+    }
+
+    if (!blob) return res.status(404).send('Arquivo não encontrado');
+
+    res.setHeader('Content-Type', mime);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(blob);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('Erro ao baixar arquivo');
   }
 };

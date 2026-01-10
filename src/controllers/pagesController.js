@@ -53,10 +53,10 @@ exports.inscricaoPost = async (req, res) => {
     const fotoF = f.foto?.[0];
     const fotoSantoF = f.fotoSanto?.[0];
 
-    const allowed = (m) => m && (m.startsWith('image/') || m === 'application/pdf');
+    const allowed = (m) => m && m.startsWith('image/');
     const must = (file, name) => {
       if (!file) throw new Error(`${name} é obrigatório`);
-      if (!allowed(file.mimetype)) throw new Error(`${name} deve ser imagem ou PDF`);
+      if (!allowed(file.mimetype)) throw new Error(`${name} deve ser imagem`);
     };
     must(docF, 'Documento de identificação');
     must(fotoF, 'Foto pessoal');

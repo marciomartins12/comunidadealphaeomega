@@ -10,7 +10,7 @@
         <div class="form-field form-col table-wrap">
           <table class="data-table">
             <thead>
-              <tr><th>Nome</th><th>CPF</th><th>Pago em</th><th>ID</th></tr>
+              <tr><th>Nome</th><th>CPF</th><th>Pago em</th><th>Arquivos</th></tr>
             </thead>
             <tbody>
               {{#each rows}}
@@ -18,7 +18,11 @@
                 <td>{{this.nome}}</td>
                 <td>{{this.cpf}}</td>
                 <td>{{this.paid_at_br}}</td>
-                <td>{{this.id}}</td>
+                <td>
+                  <a href="/admin/inscricao/{{this.id}}/arquivo/doc" target="_blank" style="margin-right: 5px;">Doc</a>
+                  <a href="/admin/inscricao/{{this.id}}/arquivo/foto" target="_blank" style="margin-right: 5px;">Foto</a>
+                  <a href="/admin/inscricao/{{this.id}}/arquivo/santo" target="_blank">Santo</a>
+                </td>
               </tr>
               {{/each}}
             </tbody>
