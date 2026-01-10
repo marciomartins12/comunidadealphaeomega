@@ -8,6 +8,16 @@ if (accessToken) {
   paymentClient = new Payment(client);
 }
 
+const validaCPF = (cpf) => {
+  const c = (cpf || '').replace(/\D/g, '');
+  if (!c || c.length !== 11 || /^([0-9])\1{10}$/.test(c)) return false;
+  const calc = (base) => {
+    let sum = 0; for (let i = 0; i < base; i++) sum += parseInt(c[i], 10) * (base + 1 - i);
+    const rest = (sum * 10) % 11; return rest === 10 ? 0 : rest;
+  };
+  return calc(9) === parseInt(c[9], 10) && calc(10) === parseInt(c[10], 10);
+};
+
 exports.createPixPayment = async ({ amount, description, nome, cpf }) => {
   if (!paymentClient) {
     throw new Error('MP_ACCESS_TOKEN não configurado');
@@ -25,7 +35,7 @@ exports.createPixPayment = async ({ amount, description, nome, cpf }) => {
     payer: {
       email: process.env.MP_PAYER_EMAIL_DEFAULT || 'inscricao@retiro.local',
       first_name: nome,
-      ...(String(cpf || '').replace(/\D/g, '').length === 11 ? { identification: { type: 'CPF', number: String(cpf || '').replace(/\D/g, '') } } : {})
+      ...(validaCPF(cpf) ? { identification: { type: 'CPF', number: String(cpf).replace(/\D/g, '') } } : {})
     }
   };
 
