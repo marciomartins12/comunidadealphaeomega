@@ -19,9 +19,17 @@
                 <td>{{this.cpf}}</td>
                 <td>{{this.paid_at_br}}</td>
                 <td>
-                  <a href="/admin/inscricao/{{this.id}}/arquivo/doc" target="_blank" style="margin-right: 5px;">Doc</a>
-                  <a href="/admin/inscricao/{{this.id}}/arquivo/foto" target="_blank" style="margin-right: 5px;">Foto</a>
-                  <a href="/admin/inscricao/{{this.id}}/arquivo/santo" target="_blank">Santo</a>
+                  <div class="action-group">
+                    <a href="/admin/inscricao/{{this.id}}/arquivo/doc" target="_blank" class="action-btn" title="Documento">
+                      <span class="btn-icon">📄</span> Doc
+                    </a>
+                    <a href="/admin/inscricao/{{this.id}}/arquivo/foto" target="_blank" class="action-btn" title="Foto Pessoal">
+                      <span class="btn-icon">👤</span> Foto
+                    </a>
+                    <a href="/admin/inscricao/{{this.id}}/arquivo/santo" target="_blank" class="action-btn" title="Foto do Santo">
+                      <span class="btn-icon">✝️</span> Santo
+                    </a>
+                  </div>
                 </td>
               </tr>
               {{/each}}
