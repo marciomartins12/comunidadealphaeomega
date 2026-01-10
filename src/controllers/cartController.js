@@ -35,6 +35,7 @@ const products = {
   }
 };
 
+// Adiciona item ao carrinho
 exports.add = async (req, res) => {
   try {
     const u = req.session.user;
@@ -52,6 +53,7 @@ exports.add = async (req, res) => {
   }
 };
 
+// Exibe o carrinho de compras
 exports.view = async (req, res) => {
   const u = req.session.user;
   if (!u) return res.redirect('/login?next=/carrinho');
@@ -77,6 +79,7 @@ exports.view = async (req, res) => {
   res.render('carrinho', { pageTitle: 'Carrinho', items: mapped, totalBRL: valor, pageClass: 'cart-page', pendingOrderId: pendingOrder?.id || null, pendingOrderTotalBRL: pendingOrder ? fmt.format(Number(pendingOrder.total || 0)) : null });
 };
 
+// Atualiza item do carrinho
 exports.updateItem = async (req, res) => {
   const u = req.session.user;
   if (!u) return res.status(401).json({ ok: false, error: 'login_required' });
@@ -88,6 +91,7 @@ exports.updateItem = async (req, res) => {
   res.json({ ok: true });
 };
 
+// Remove item do carrinho
 exports.deleteItem = async (req, res) => {
   const u = req.session.user;
   if (!u) return res.status(401).json({ ok: false, error: 'login_required' });
@@ -96,6 +100,7 @@ exports.deleteItem = async (req, res) => {
   res.json({ ok: true });
 };
 
+// Inicia o checkout (pagamento)
 exports.checkout = async (req, res) => {
   try {
     const u = req.session.user;
@@ -134,6 +139,7 @@ exports.checkout = async (req, res) => {
   }
 };
 
+// Exibe página de pagamento do pedido da loja
 exports.pagamentoLoja = async (req, res) => {
   const { id } = req.params;
   const order = await getOrder(id);
@@ -150,6 +156,7 @@ exports.pagamentoLoja = async (req, res) => {
   });
 };
 
+// Verifica status do pagamento do pedido da loja
 exports.pagamentoLojaStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -221,6 +228,7 @@ exports.historico = async (req, res) => {
   res.json({ ok: true, orders: out });
 };
 
+// Conta itens no carrinho
 exports.count = async (req, res) => {
   try {
     const u = req.session.user;

@@ -43,10 +43,12 @@ exports.registerPost = async (req, res) => {
   }
 };
 
+// Faz logout do usuário
 exports.logout = (req, res) => {
   req.session.destroy(() => res.redirect('/'));
 };
 
+// Processa a redefinição de senha
 exports.resetPasswordPost = async (req, res) => {
   try {
     const { email, cpf, senha, next } = req.body;

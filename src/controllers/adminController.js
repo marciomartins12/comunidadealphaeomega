@@ -2,10 +2,12 @@ const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed
 const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
 
+// Exibe a página de login do administrador
 exports.loginPage = (req, res) => {
   res.render('admin/login', { pageTitle: 'Entrar como administrador', pageClass: 'auth-page' });
 };
 
+// Processa o login do administrador
 exports.loginPost = async (req, res) => {
   try {
     const { email, senha } = req.body;
@@ -20,16 +22,19 @@ exports.loginPost = async (req, res) => {
   }
 };
 
+// Faz logout do administrador
 exports.logout = (req, res) => {
   delete req.session.admin;
   res.redirect('/');
 };
 
+// Middleware para verificar se o usuário é administrador
 exports.requireAdmin = (req, res, next) => {
   if (!req.session.admin) return res.redirect('/admin/login');
   next();
 };
 
+// Exibe o dashboard do administrador
 exports.dashboard = async (req, res) => {
   const [insc, orders, donations] = await Promise.all([listPaidInscricoes(), listPaidOrdersDetailed(), listPaidDonations()]);
   const fee = 0.0099;
@@ -49,6 +54,7 @@ exports.dashboard = async (req, res) => {
   });
 };
 
+// Lista as inscrições pagas
 exports.viewInscricoes = async (req, res) => {
   const rows = await listPaidInscricoes();
   const fmt = (d) => {
@@ -65,6 +71,7 @@ exports.viewInscricoes = async (req, res) => {
   res.render('admin/inscricoes', { pageTitle: 'Inscrições pagas', rows: out, count: out.length });
 };
 
+// Lista os pedidos pagos
 exports.viewPedidos = async (req, res) => {
   const rows = await listPaidOrdersDetailed();
   const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -106,6 +113,7 @@ exports.viewPedidos = async (req, res) => {
   res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length, netTotalBRL: money.format(netTotal), productsSummary, cordaoTotal });
 };
 
+// Lista as doações
 exports.viewDoacoes = async (req, res) => {
   const rows = await listDonations();
   const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -129,10 +137,12 @@ exports.viewDoacoes = async (req, res) => {
   res.render('admin/doacoes', { pageTitle: 'Doações', rows: out, count: out.length });
 };
 
+// Exibe página para criar novo administrador
 exports.adminCreatePage = (req, res) => {
   res.render('admin/admin_new', { pageTitle: 'Criar novo administrador' });
 };
 
+// Processa a criação de novo administrador
 exports.adminCreatePost = async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
@@ -184,6 +194,7 @@ exports.approveOrderManual = async (req, res) => {
   }
 };
 
+// Remove pedidos não pagos
 exports.purgeUnpaidOrders = async (req, res) => {
   try {
     const deleted = await deleteUnpaidOrders();

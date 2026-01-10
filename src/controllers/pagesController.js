@@ -1,3 +1,4 @@
+// Exibe a página inicial
 exports.home = (req, res) => {
   res.render('index', {
     pageTitle: 'Retiro Alfa & Ômega',
@@ -5,10 +6,12 @@ exports.home = (req, res) => {
   });
 };
 
+// Exibe a página Sobre (em construção)
 exports.sobre = (req, res) => {
   res.send('Página Sobre o Retiro em construção.');
 };
 
+// Exibe o formulário de inscrição
 exports.inscricao = (req, res) => {
   res.render('inscricao', {
     pageTitle: 'Inscrição'
@@ -30,6 +33,7 @@ const validaCPF = (cpf) => {
   return calc(9) === parseInt(c[9], 10) && calc(10) === parseInt(c[10], 10);
 };
 
+// Processa o envio do formulário de inscrição
 exports.inscricaoPost = async (req, res) => {
   try {
     const b = req.body;
@@ -105,6 +109,7 @@ exports.inscricaoPost = async (req, res) => {
   }
 };
 
+// Exibe a página de pagamento da inscrição
 exports.pagamento = async (req, res) => {
   const { id } = req.params;
   const data = await getInscricao(id);
@@ -121,6 +126,7 @@ exports.pagamento = async (req, res) => {
   });
 };
 
+// Verifica o status do pagamento da inscrição e atualiza se necessário
 exports.pagamentoStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -160,6 +166,7 @@ exports.pagamentoStatus = async (req, res) => {
   }
 };
 
+// Webhook para receber notificações do Mercado Pago
 exports.mercadoPagoWebhook = async (req, res) => {
   try {
     const body = req.body || {};
@@ -193,6 +200,7 @@ exports.mercadoPagoWebhook = async (req, res) => {
   }
 };
 
+// Exibe a página da loja
 exports.loja = (req, res) => {
   res.render('loja', {
     pageTitle: 'Loja'
@@ -200,22 +208,28 @@ exports.loja = (req, res) => {
 };
 
 
+// Exibe informações sobre a revista (em construção)
 exports.revista = (req, res) => {
   const { slug } = req.params;
   res.send(`A revista "${slug}" estará disponível em fevereiro.`);
 };
 
+// Exibe a galeria de fotos (em construção)
 exports.galeria = (req, res) => {
   res.send('Galeria em construção.');
 };
 
+// Exibe o documentário (em construção)
 exports.documentario = (req, res) => {
   res.send('Documentário RC em construção.');
 };
 
+// Exibe a agenda
 exports.agenda = (req, res) => {
   res.render('agenda', { pageTitle: 'Agenda RC' });
 };
+
+// Verifica o status da inscrição pelo CPF
 exports.inscricaoStatus = async (req, res) => {
   try {
     const cpf = (req.query.cpf || '').replace(/\D/g, '');
@@ -273,6 +287,7 @@ exports.doacaoPagamento = async (req, res) => {
   });
 };
 
+// Verifica o status do pagamento da doação
 exports.doacaoPagamentoStatus = async (req, res) => {
   try {
     const { id } = req.params;
