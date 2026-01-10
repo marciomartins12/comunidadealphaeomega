@@ -591,7 +591,7 @@ exports.listInscricoes = async () => {
 exports.listPaidInscricoes = async () => {
   const conn = await pool.getConnection();
   try {
-    const [rows] = await conn.execute('SELECT id, nome, cpf, mp_status, paid_at, created_at FROM inscricoes WHERE mp_status = ? ORDER BY nome ASC', ['approved']);
+    const [rows] = await conn.execute('SELECT id, nome, cpf, sexo, nascimento, whatsapp, mp_status, paid_at, created_at FROM inscricoes WHERE mp_status = ? ORDER BY nome ASC', ['approved']);
     return rows;
   } finally { conn.release(); }
 };

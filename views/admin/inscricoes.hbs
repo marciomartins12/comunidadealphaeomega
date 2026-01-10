@@ -4,20 +4,32 @@
     <div class="shop-topbar">
       <a href="/admin" class="shop-back">Voltar para dashboard</a>
     </div>
+    <div class="filter-bar" style="margin-bottom: 20px;">
+      <input type="text" id="tableFilter" class="insc-input" placeholder="Filtrar por nome, CPF, idade..." style="width: 100%; max-width: 100%;">
+    </div>
     {{#if count}}
     <div class="form-card">
       <div class="form-grid">
         <div class="form-field form-col table-wrap">
-          <table class="data-table">
+          <table class="data-table" id="inscTable">
             <thead>
-              <tr><th>Nome</th><th>CPF</th><th>Pago em</th><th>Arquivos</th></tr>
+              <tr>
+                <th>Nome</th>
+                <th>Idade</th>
+                <th>Sexo</th>
+                <th>WhatsApp</th>
+                <th>CPF</th>
+                <th>Arquivos</th>
+              </tr>
             </thead>
             <tbody>
               {{#each rows}}
               <tr>
                 <td>{{this.nome}}</td>
+                <td>{{this.idade}}</td>
+                <td>{{this.sexo}}</td>
+                <td><a href="{{this.whatsapp_link}}" target="_blank" style="color: #0b0b0b; text-decoration: underline;">{{this.whatsapp}}</a></td>
                 <td>{{this.cpf}}</td>
-                <td>{{this.paid_at_br}}</td>
                 <td>
                   <div class="action-group">
                     <a href="/admin/inscricao/{{this.id}}/arquivo/doc" target="_blank" class="action-btn" title="Documento">
@@ -66,4 +78,14 @@
     .action-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
     .btn-icon { font-size: 14px; line-height: 1; }
   </style>
+  <script>
+    document.getElementById('tableFilter').addEventListener('keyup', function() {
+      const val = this.value.toLowerCase();
+      const rows = document.querySelectorAll('#inscTable tbody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(val) ? '' : 'none';
+      });
+    });
+  </script>
 </section>

@@ -64,9 +64,25 @@ exports.viewInscricoes = async (req, res) => {
     const yyyy = d.getFullYear();
     return `${dd}/${mm}/${yyyy}`;
   };
+  const getAge = (d) => {
+    if (!d) return '';
+    const today = new Date();
+    const birth = new Date(d);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  };
   const out = rows.map(r => {
     const dt = r.paid_at ? new Date(r.paid_at) : null;
-    return { ...r, paid_at_br: dt ? fmt(dt) : '' };
+    const nasc = r.nascimento ? new Date(r.nascimento) : null;
+    return {
+      ...r,
+      paid_at_br: dt ? fmt(dt) : '',
+      nascimento_br: nasc ? fmt(nasc) : '',
+      idade: nasc ? getAge(nasc) : '',
+      whatsapp_link: r.whatsapp ? `https://wa.me/55${r.whatsapp.replace(/\D/g, '')}` : '#'
+    };
   });
   res.render('admin/inscricoes', { pageTitle: 'Inscrições pagas', rows: out, count: out.length });
 };
