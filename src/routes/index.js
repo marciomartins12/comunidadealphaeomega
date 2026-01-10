@@ -66,6 +66,7 @@ router.get('/admin/pedidos/refresh', admin.requireAdmin, admin.refreshOrdersStat
 router.get('/admin/pedidos/approve/:id', admin.requireAdmin, admin.approveOrderManual);
 router.post('/admin/pedidos/purge-unpaid', admin.requireAdmin, admin.purgeUnpaidOrders);
 router.get('/admin/pedidos/purge-unpaid', admin.requireAdmin, admin.purgeUnpaidOrders);
+router.get('/admin/inscricao/:id/arquivo/zip', admin.requireAdmin, admin.downloadInscricaoZip);
 router.get('/admin/inscricao/:id/arquivo/:tipo', admin.requireAdmin, admin.downloadInscricaoFile);
 
 module.exports = router;

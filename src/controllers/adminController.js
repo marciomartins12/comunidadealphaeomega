@@ -1,6 +1,7 @@
 const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed, listDonations, listPaidDonations, listOrders, clearCartForUser, updateOrderPaymentStatus, getOrder, deleteUnpaidOrders, getInscricao } = require('../mysql');
 const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
+const AdmZip = require('adm-zip');
 
 // Exibe a página de login do administrador
 exports.loginPage = (req, res) => {
@@ -252,5 +253,40 @@ exports.downloadInscricaoFile = async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).send('Erro ao baixar arquivo');
+  }
+};
+
+// Baixa todos os arquivos da inscrição em ZIP
+exports.downloadInscricaoZip = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const insc = await getInscricao(id);
+    if (!insc) return res.status(404).send('Inscrição não encontrada');
+
+    const zip = new AdmZip();
+    const cleanCpf = (insc.cpf || '').replace(/\D/g, '');
+
+    if (insc.doc_blob) {
+        const ext = insc.doc_mime ? insc.doc_mime.split('/')[1] : 'bin';
+        zip.addFile(`doc_${cleanCpf}.${ext}`, insc.doc_blob);
+    }
+    if (insc.foto_blob) {
+        const ext = insc.foto_mime ? insc.foto_mime.split('/')[1] : 'bin';
+        zip.addFile(`foto_${cleanCpf}.${ext}`, insc.foto_blob);
+    }
+    if (insc.foto_santo_blob) {
+        const ext = insc.foto_santo_mime ? insc.foto_santo_mime.split('/')[1] : 'bin';
+        zip.addFile(`santo_${cleanCpf}.${ext}`, insc.foto_santo_blob);
+    }
+
+    const zipBuffer = zip.toBuffer();
+    const fileName = `arquivos_${(insc.nome || 'inscricao').replace(/[^a-z0-9]/gi, '_')}.zip`;
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(zipBuffer);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('Erro ao gerar ZIP');
   }
 };
