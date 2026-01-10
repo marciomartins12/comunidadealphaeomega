@@ -2,6 +2,7 @@ const { getAdminByEmail, createAdmin, listPaidInscricoes, listPaidOrdersDetailed
 const { getPaymentStatus } = require('../services/payment');
 const bcrypt = require('bcryptjs');
 const AdmZip = require('adm-zip');
+const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, BorderStyle } = require('docx');
 
 // Exibe a página de login do administrador
 exports.loginPage = (req, res) => {
@@ -128,6 +129,105 @@ exports.viewPedidos = async (req, res) => {
   const cordaoCounts = productMap['cordao_alfa_omega'] ? productMap['cordao_alfa_omega'].counts : null;
   const cordaoTotal = cordaoCounts ? Object.values(cordaoCounts).reduce((acc, n) => acc + Number(n || 0), 0) : 0;
   res.render('admin/pedidos', { pageTitle: 'Pedidos pagos', rows: out, count: out.length, netTotalBRL: money.format(netTotal), productsSummary, cordaoTotal });
+};
+
+// Baixa relatório de pedidos em DOCX
+exports.downloadPedidosDocx = async (req, res) => {
+  try {
+    const rows = await listPaidOrdersDetailed();
+    const money = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmt = (d) => {
+      if (!d) return '';
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    };
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Relatório de Pedidos - Loja Alpha&Ômega",
+                bold: true,
+                size: 32,
+              }),
+            ],
+            spacing: { after: 400 },
+          }),
+          ...rows.map(order => {
+            const dt = order.paid_at ? new Date(order.paid_at) : null;
+            const itemsText = (order.items || []).map(it => 
+              `• ${it.name} (${it.size}) - Qtd: ${it.qty}`
+            ).join('\n');
+
+            return [
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `Pedido #${order.id}`, bold: true, size: 24 }),
+                ],
+                spacing: { before: 200, after: 100 },
+              }),
+              new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: [
+                  new TableRow({
+                    children: [
+                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cliente:", bold: true })] })] }),
+                      new TableCell({ children: [new Paragraph(order.buyer.nome)] }),
+                    ],
+                  }),
+                  new TableRow({
+                    children: [
+                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "CPF:", bold: true })] })] }),
+                      new TableCell({ children: [new Paragraph(order.buyer.cpf)] }),
+                    ],
+                  }),
+                  new TableRow({
+                    children: [
+                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cidade:", bold: true })] })] }),
+                      new TableCell({ children: [new Paragraph(order.buyer.cidade)] }),
+                    ],
+                  }),
+                  new TableRow({
+                    children: [
+                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Data Pagamento:", bold: true })] })] }),
+                      new TableCell({ children: [new Paragraph(dt ? fmt(dt) : 'N/A')] }),
+                    ],
+                  }),
+                  new TableRow({
+                    children: [
+                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Itens:", bold: true })] })] }),
+                      new TableCell({ children: [new Paragraph(itemsText)] }),
+                    ],
+                  }),
+                  new TableRow({
+                    children: [
+                      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Total:", bold: true })] })] }),
+                      new TableCell({ children: [new Paragraph(money.format(order.total))] }),
+                    ],
+                  }),
+                ],
+              }),
+              new Paragraph({ text: "", spacing: { after: 200 } }), // Espaço entre pedidos
+            ];
+          }).flat(),
+        ],
+      }],
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', 'attachment; filename="pedidos_loja.docx"');
+    res.send(buffer);
+  } catch (e) {
+    console.error(e);
+    res.status(500).send('Erro ao gerar DOCX');
+  }
 };
 
 // Lista as doações
