@@ -144,6 +144,42 @@ exports.downloadPedidosDocx = async (req, res) => {
       return `${dd}/${mm}/${yyyy}`;
     };
 
+    const sizes = ['PP', 'P', 'M', 'G', 'GG', 'XG', 'U'];
+    const productMap = {};
+    for (const r of rows) {
+      for (const it of r.items || []) {
+        const pid = String(it.product_id || '');
+        if (!pid) continue;
+        if (!productMap[pid]) {
+          const isRegular = pid.endsWith('_regular');
+          const counts = {}; sizes.forEach(s => counts[s] = 0);
+          const type = pid === 'cordao_alfa_omega' ? 'Acessório' : (isRegular ? 'Regular' : 'Oversized');
+          productMap[pid] = { name: it.name, type, counts };
+        }
+        const sz = sizes.includes(String(it.size)) ? String(it.size) : null;
+        if (sz) productMap[pid].counts[sz] += Number(it.qty || 0);
+      }
+    }
+
+    const summaryParagraphs = [];
+    Object.values(productMap).forEach(p => {
+      const activeSizes = sizes.filter(s => p.counts[s] > 0).map(s => `${s}: ${p.counts[s]}`).join(' | ');
+      if (activeSizes) {
+        summaryParagraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${p.name} (${p.type})`, bold: true, size: 24 }),
+            ],
+            spacing: { before: 100 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: activeSizes, size: 22 })],
+            spacing: { after: 100 },
+          })
+        );
+      }
+    });
+
     const doc = new Document({
       sections: [{
         properties: {},
@@ -157,6 +193,20 @@ exports.downloadPedidosDocx = async (req, res) => {
               }),
             ],
             spacing: { after: 400 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Resumo de Quantidades por Produto:", bold: true, size: 28, underline: {} }),
+            ],
+            spacing: { after: 200 },
+          }),
+          ...summaryParagraphs,
+          new Paragraph({ text: "", spacing: { after: 400 } }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Detalhamento dos Pedidos:", bold: true, size: 28, underline: {} }),
+            ],
+            spacing: { after: 200 },
           }),
           ...rows.map(order => {
             const dt = order.paid_at ? new Date(order.paid_at) : null;
